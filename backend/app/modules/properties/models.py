@@ -42,6 +42,7 @@ class Property(SyncColumnsMixin, Base):
     plan_tier: Mapped[PlanTier] = enum_column(PlanTier, nullable=False, default=PlanTier.TRIAL)
     subscription_plan: Mapped[str] = mapped_column(String(32), nullable=False, default="TRIAL")
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="ACTIVE")
+    verification_status: Mapped[str] = mapped_column(String(32), nullable=False, default="PROVISIONAL_ACTIVE")
     feature_overrides: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     trial_ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     phone: Mapped[str | None] = mapped_column(String(20))
@@ -50,6 +51,14 @@ class Property(SyncColumnsMixin, Base):
     state: Mapped[str | None] = mapped_column(String(80))
     timezone: Mapped[str] = mapped_column(String(48), nullable=False, default="Asia/Kolkata")
     gstin: Mapped[str | None] = mapped_column(String(20))
+    latitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 7))
+    longitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 7))
+    google_maps_url: Mapped[str | None] = mapped_column(String(500))
+    police_station_jurisdiction: Mapped[str | None] = mapped_column(String(160))
+    accessibility_metadata: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    operational_policies: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    category_licenses: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    owner_pan_number: Mapped[str | None] = mapped_column(String(20))
 
 
 @event.listens_for(Property, "before_insert")
@@ -59,8 +68,16 @@ def _property_is_its_own_tenant(_mapper, _connection, target: Property) -> None:
     if target.property_id is None:
         target.property_id = target.id
     if not target.business_code:
-        cat_prefix = "HM" if target.business_category == BusinessCategory.HOMESTAY else str(target.business_category)[:3].upper()
-        target.business_code = f"SS-{cat_prefix}-{secrets.randbelow(9000) + 1000}"
+        cat_map = {
+            BusinessCategory.HOMESTAY: "HM",
+            BusinessCategory.HOTEL: "HT",
+            BusinessCategory.RESORT: "RS",
+            BusinessCategory.RESTAURANT: "RT",
+            BusinessCategory.BAR: "BR",
+            BusinessCategory.OTHER_SERVICES: "OS",
+        }
+        prefix = cat_map.get(target.business_category, "HM")
+        target.business_code = f"SS-{prefix}-{secrets.randbelow(9000) + 1000}"
 
 
 class User(TenantMixin, Base):

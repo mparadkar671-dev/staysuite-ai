@@ -20,6 +20,7 @@ from app.modules.auth_rbac.router import (
 from app.modules.billing_pos.router import khata_router, router as billing_pos_router
 from app.modules.bookings.router import router as bookings_router
 from app.modules.dining_bom.router import router as dining_bom_router
+from app.modules.onboarding.router import router as onboarding_router
 from app.modules.properties.router import auth_router, router as properties_router
 from app.modules.saas_admin.router import router as saas_admin_router
 
@@ -59,6 +60,7 @@ app.include_router(auth_router, prefix=API_PREFIX)
 app.include_router(auth_rbac_router, prefix=API_PREFIX)
 app.include_router(staff_self_service_router, prefix=API_PREFIX)
 app.include_router(saas_admin_router, prefix=API_PREFIX)
+app.include_router(onboarding_router, prefix=API_PREFIX)
 app.include_router(properties_router, prefix=API_PREFIX)
 app.include_router(billing_pos_router, prefix=API_PREFIX)
 app.include_router(khata_router, prefix=API_PREFIX)
