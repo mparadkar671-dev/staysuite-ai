@@ -171,6 +171,9 @@ export default function MultiCategoryOnboardingWizard() {
   const [sameAsMobile, setSameAsMobile] = useState(true);
   const [password, setPassword] = useState("konkan2026");
   const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("konkan2026");
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordMismatchError, setPasswordMismatchError] = useState("");
 
   // STEP 3: Google Maps & Location
   const [formattedAddress, setFormattedAddress] = useState("Near Dandi Beach Bridge, Wayari Bhutnath Road, Malvan");
@@ -322,6 +325,7 @@ export default function MultiCategoryOnboardingWizard() {
         owner_whatsapp: sameAsMobile ? mobile : whatsapp,
         owner_email: email,
         password: password,
+        confirm_password: confirmPassword,
         formatted_address: formattedAddress,
         street_landmark: streetLandmark,
         village_city: villageCity,
@@ -776,7 +780,11 @@ export default function MultiCategoryOnboardingWizard() {
                       <input
                         type={showPassword ? "text" : "password"}
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+                          if (passwordMismatchError) setPasswordMismatchError("");
+                        }}
+                        placeholder="Enter at least 6 characters"
                         className="w-full p-3 border border-slate-300 rounded-xl outline-none font-medium text-xs pr-10"
                       />
                       <button
@@ -791,6 +799,70 @@ export default function MultiCategoryOnboardingWizard() {
                       Minimum 6 characters. Used by Owner to login across all 3 pillars.
                     </span>
                   </div>
+
+                  {/* Re-enter Password for Confirmation */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-slate-700 font-bold text-xs">
+                        Re-enter Password (Confirm) *
+                      </label>
+                      {confirmPassword.length > 0 && (
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                            password === confirmPassword
+                              ? "bg-emerald-100 text-emerald-800"
+                              : "bg-rose-100 text-rose-800"
+                          }`}
+                        >
+                          {password === confirmPassword ? (
+                            <>
+                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                              <span>Passwords Match</span>
+                            </>
+                          ) : (
+                            <>
+                              <AlertCircle className="w-3 h-3 text-rose-600" />
+                              <span>Passwords Do Not Match</span>
+                            </>
+                          )}
+                        </span>
+                      )}
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={(e) => {
+                          setConfirmPassword(e.target.value);
+                          if (passwordMismatchError) setPasswordMismatchError("");
+                        }}
+                        placeholder="Re-enter your master password"
+                        className={`w-full p-3 border rounded-xl outline-none font-medium text-xs pr-10 transition ${
+                          confirmPassword && password !== confirmPassword
+                            ? "border-rose-400 bg-rose-50/20"
+                            : confirmPassword && password === confirmPassword
+                            ? "border-emerald-400 bg-emerald-50/20"
+                            : "border-slate-300"
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <span className="text-[10px] text-slate-400 block">
+                      Confirming your password guarantees error-free authentication across StaySuite App & PMS Desk.
+                    </span>
+                    {passwordMismatchError && (
+                      <p className="text-xs text-rose-600 font-bold flex items-center gap-1.5 mt-1 bg-rose-50 border border-rose-200 p-2 rounded-lg">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                        <span>{passwordMismatchError}</span>
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex gap-2">
@@ -801,7 +873,18 @@ export default function MultiCategoryOnboardingWizard() {
                     Back
                   </button>
                   <button
-                    onClick={() => setStep(3)}
+                    onClick={() => {
+                      if (!password || password.length < 6) {
+                        setPasswordMismatchError("Master Password must be at least 6 characters.");
+                        return;
+                      }
+                      if (password !== confirmPassword) {
+                        setPasswordMismatchError("Passwords do not match. Please re-enter the same password to confirm.");
+                        return;
+                      }
+                      setPasswordMismatchError("");
+                      setStep(3);
+                    }}
                     className="flex-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30"
                   >
                     <span>Next: Google Maps & Location</span>

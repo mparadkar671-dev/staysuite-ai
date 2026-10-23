@@ -57,6 +57,7 @@ class PropertyOnboardingSubmitRequest(BaseModel):
     owner_whatsapp: str | None = None
     owner_email: EmailStr
     password: str = Field(..., min_length=6, max_length=100)
+    confirm_password: str | None = Field(None, min_length=6, max_length=100, description="Re-entered password for confirmation")
 
     # Step 3: Location & Google Maps Picker
     formatted_address: str = Field(..., min_length=5)
@@ -121,6 +122,10 @@ class PropertyOnboardingSubmitRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_conditional_rules(self) -> "PropertyOnboardingSubmitRequest":
+        # 0. Password confirmation check
+        if self.confirm_password and self.password != self.confirm_password:
+            raise ValueError("Password confirmation does not match the entered master password.")
+
         # 1. Aadhaar privacy rule: strictly forbid unmasked 12 digit numbers
         if self.owner_gov_id_type == "AADHAAR_REDACTED":
             raw_digits = re.findall(r"\b\d{12}\b", self.owner_gov_id_masked_display)
