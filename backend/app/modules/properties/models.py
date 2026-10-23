@@ -11,16 +11,23 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.core.db import Base, SyncColumnsMixin, TenantMixin, enum_column, tenant_index
 from app.core.enums import BusinessCategory, HousekeepingStatus, PlanTier, Role
 
+def _generate_business_code() -> str:
+    # Returns human-readable code like SS-HM-8492
+    return f"SS-HM-{secrets.randbelow(9000) + 1000}"
+
+
 class Property(SyncColumnsMixin, Base):
     """A hospitality business. It is the tenant root: `property_id` always equals `id`."""
 
     __tablename__ = "properties"
     __table_args__ = (
         UniqueConstraint("slug", name="uq_properties_slug"),
+        UniqueConstraint("business_code", name="uq_properties_business_code"),
         Index("ix_properties_property_id_updated", "property_id", "updated_at"),
     )
 
     property_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
+    business_code: Mapped[str] = mapped_column(String(32), nullable=False, default=_generate_business_code, index=True)
     name: Mapped[str] = mapped_column(String(160), nullable=False)
     slug: Mapped[str] = mapped_column(String(80), nullable=False)
     business_category: Mapped[BusinessCategory] = enum_column(
@@ -33,6 +40,9 @@ class Property(SyncColumnsMixin, Base):
         Boolean, nullable=False, default=False, server_default=false()
     )
     plan_tier: Mapped[PlanTier] = enum_column(PlanTier, nullable=False, default=PlanTier.TRIAL)
+    subscription_plan: Mapped[str] = mapped_column(String(32), nullable=False, default="TRIAL")
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="ACTIVE")
+    feature_overrides: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     trial_ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     phone: Mapped[str | None] = mapped_column(String(20))
     address: Mapped[str | None] = mapped_column(Text)
@@ -48,19 +58,25 @@ def _property_is_its_own_tenant(_mapper, _connection, target: Property) -> None:
         target.id = uuid.uuid4()
     if target.property_id is None:
         target.property_id = target.id
+    if not target.business_code:
+        cat_prefix = "HM" if target.business_category == BusinessCategory.HOMESTAY else str(target.business_category)[:3].upper()
+        target.business_code = f"SS-{cat_prefix}-{secrets.randbelow(9000) + 1000}"
 
 
 class User(TenantMixin, Base):
     """A login identity (Owner / Manager / Staff). Never synced to devices."""
 
     __tablename__ = "users"
-    __table_args__ = (UniqueConstraint("phone", name="uq_users_phone"), tenant_index("users"))
+    __table_args__ = (tenant_index("users"),)
 
     name: Mapped[str] = mapped_column(String(120), nullable=False)
-    phone: Mapped[str] = mapped_column(String(20), nullable=False)
+    phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
     email: Mapped[str | None] = mapped_column(String(200))
     password_hash: Mapped[str] = mapped_column(String(100), nullable=False)
     role: Mapped[Role] = enum_column(Role, nullable=False)
+    staff_member_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), index=True)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="ACTIVE")
+    avatar: Mapped[str | None] = mapped_column(String(255))
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=true())
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 

@@ -13,10 +13,15 @@ from app.core.config import get_settings
 from app.core.db import SessionFactory, engine
 from app.core.realtime import hub
 from app.modules.ai_copilot.router import router as copilot_router
+from app.modules.auth_rbac.router import (
+    router as auth_rbac_router,
+    staff_self_service_router,
+)
 from app.modules.billing_pos.router import khata_router, router as billing_pos_router
 from app.modules.bookings.router import router as bookings_router
 from app.modules.dining_bom.router import router as dining_bom_router
 from app.modules.properties.router import auth_router, router as properties_router
+from app.modules.saas_admin.router import router as saas_admin_router
 
 settings = get_settings()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -51,6 +56,9 @@ app.add_middleware(
 
 API_PREFIX = "/api/v1"
 app.include_router(auth_router, prefix=API_PREFIX)
+app.include_router(auth_rbac_router, prefix=API_PREFIX)
+app.include_router(staff_self_service_router, prefix=API_PREFIX)
+app.include_router(saas_admin_router, prefix=API_PREFIX)
 app.include_router(properties_router, prefix=API_PREFIX)
 app.include_router(billing_pos_router, prefix=API_PREFIX)
 app.include_router(khata_router, prefix=API_PREFIX)

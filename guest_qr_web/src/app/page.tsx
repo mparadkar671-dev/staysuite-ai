@@ -44,83 +44,171 @@ export default function MasterDemoHub() {
         <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl" />
       </div>
 
-      {/* Quick Launch Buttons for Homestay Demo */}
-      <div className="space-y-2">
-        <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
-          🚀 Instant Demo Switchboard (Choose Role to Test)
-        </p>
-        <div className="grid grid-cols-2 gap-2">
-          <Link
-            href="/owner/dashboard"
-            className="p-3 bg-white border-2 border-indigo-200 hover:border-indigo-600 rounded-xl flex flex-col justify-between shadow-sm transition group"
-          >
-            <div>
-              <span className="text-[10px] font-black text-indigo-700 uppercase bg-indigo-50 px-2 py-0.5 rounded">
-                Role 1: Owner
-              </span>
-              <p className="font-extrabold text-xs text-slate-900 mt-1 group-hover:text-indigo-600">
-                🏨 Manager PMS Desk
-              </p>
-              <p className="text-[10px] text-slate-500 mt-0.5">Calendar, Split Billing, Freeze & UPI</p>
-            </div>
-            <span className="text-[11px] font-bold text-indigo-600 mt-2 flex items-center gap-1">
-              Open PMS →
-            </span>
-          </Link>
+      {/* 3-PILLAR ECOSYSTEM DEMO SWITCHBOARD */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+            🏛️ Complete 3-Pillar Ecosystem & Multi-Person Roles
+          </p>
+          <span className="text-[10px] font-mono font-bold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded">
+            Zero-Rewrite Matrix Active
+          </span>
+        </div>
 
-          <Link
-            href="/kitchen"
-            className="p-3 bg-white border-2 border-amber-200 hover:border-amber-600 rounded-xl flex flex-col justify-between shadow-sm transition group"
-          >
-            <div>
-              <span className="text-[10px] font-black text-amber-800 uppercase bg-amber-50 px-2 py-0.5 rounded">
-                Role 2: Kitchen
-              </span>
-              <p className="font-extrabold text-xs text-slate-900 mt-1 group-hover:text-amber-700">
-                🧑‍🍳 7 AM Market BOM
-              </p>
-              <p className="text-[10px] text-slate-500 mt-0.5">Fish & Veg list + Cook tickets</p>
-            </div>
-            <span className="text-[11px] font-bold text-amber-700 mt-2 flex items-center gap-1">
-              Open Kitchen →
+        {/* PILLAR 1: Super Admin */}
+        <div className="bg-gradient-to-r from-purple-950 via-indigo-950 to-slate-900 text-white p-3.5 rounded-2xl shadow-sm space-y-2 border border-purple-500/20">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-wider text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded">
+              Pillar 1: Main Business Model
             </span>
-          </Link>
+            <span className="text-[10px] text-purple-200">SaaS Control Plane</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xs font-black">Super Admin Telemetry & Kill-Switch</h2>
+              <p className="text-[10px] text-purple-200/80">Platform revenue MRR, category breakdown, 1-click property freeze</p>
+            </div>
+            <Link
+              href="/owner/dashboard"
+              className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-sm shrink-0"
+            >
+              <span>Control Plane</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
 
-          <Link
-            href="/onboarding"
-            className="p-3 bg-white border-2 border-slate-200 hover:border-indigo-500 rounded-xl flex flex-col justify-between shadow-sm transition group"
-          >
-            <div>
-              <span className="text-[10px] font-black text-slate-700 uppercase bg-slate-100 px-2 py-0.5 rounded">
-                Setup Wizard
+        {/* PILLAR 2: Booking Site Grid */}
+        <div className="space-y-2">
+          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded inline-block">
+            Pillar 2: Booking Site (Marketplace & Portals)
+          </span>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <Link
+              href="/explore"
+              className="p-3 bg-white border border-slate-200 hover:border-emerald-600 rounded-xl flex flex-col justify-between shadow-sm transition group"
+            >
+              <div>
+                <p className="font-extrabold text-xs text-slate-900 group-hover:text-emerald-700">
+                  🌐 Public Marketplace
+                </p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Homestay, Hotel, Resort, Dining & Bar categories</p>
+              </div>
+              <span className="text-[11px] font-bold text-emerald-700 mt-2 flex items-center gap-1">
+                Explore Stays →
               </span>
-              <p className="font-extrabold text-xs text-slate-900 mt-1 group-hover:text-indigo-600">
-                ⚙️ List New Property
-              </p>
-              <p className="text-[10px] text-slate-500 mt-0.5">Categories, plugins, tariffs & UPI</p>
-            </div>
-            <span className="text-[11px] font-bold text-indigo-600 mt-2 flex items-center gap-1">
-              Start Wizard →
-            </span>
-          </Link>
+            </Link>
 
-          <Link
-            href="/q/rm/sample-door"
-            className="p-3 bg-white border-2 border-emerald-200 hover:border-emerald-600 rounded-xl flex flex-col justify-between shadow-sm transition group"
-          >
-            <div>
-              <span className="text-[10px] font-black text-emerald-800 uppercase bg-emerald-50 px-2 py-0.5 rounded">
-                Role 3: Staff
+            <Link
+              href="/list-your-property"
+              className="p-3 bg-white border border-slate-200 hover:border-indigo-600 rounded-xl flex flex-col justify-between shadow-sm transition group"
+            >
+              <div>
+                <p className="font-extrabold text-xs text-slate-900 group-hover:text-indigo-600">
+                  ⚙️ Host Onboarding Wizard
+                </p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Issue SS-HM-1001 ID + plan entitlement setup</p>
+              </div>
+              <span className="text-[11px] font-bold text-indigo-600 mt-2 flex items-center gap-1">
+                List Property →
               </span>
-              <p className="font-extrabold text-xs text-slate-900 mt-1 group-hover:text-emerald-700">
-                🧹 Room Door QR
-              </p>
-              <p className="text-[10px] text-slate-500 mt-0.5">Marathi voice + [🟢 खोली साफ झाली]</p>
-            </div>
-            <span className="text-[11px] font-bold text-emerald-700 mt-2 flex items-center gap-1">
-              Scan Door QR →
-            </span>
-          </Link>
+            </Link>
+
+            <Link
+              href="/customer/dashboard"
+              className="p-3 bg-white border border-slate-200 hover:border-indigo-600 rounded-xl flex flex-col justify-between shadow-sm transition group"
+            >
+              <div>
+                <p className="font-extrabold text-xs text-slate-900 group-hover:text-indigo-600">
+                  👤 Guest Booking Portal
+                </p>
+                <p className="text-[10px] text-slate-500 mt-0.5">50% Advance status, receipts & verified review</p>
+              </div>
+              <span className="text-[11px] font-bold text-indigo-600 mt-2 flex items-center gap-1">
+                My Bookings →
+              </span>
+            </Link>
+          </div>
+        </div>
+
+        {/* PILLAR 3: StaySuite App (Multi-Person Role Operating System) */}
+        <div className="space-y-2 pt-1">
+          <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded inline-block">
+            Pillar 3: StaySuite App (Multi-Tenant Operating System)
+          </span>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <Link
+              href="/auth/login"
+              className="p-3 bg-white border-2 border-indigo-200 hover:border-indigo-600 rounded-xl flex flex-col justify-between shadow-sm transition group"
+            >
+              <div>
+                <span className="text-[9px] font-black text-indigo-700 uppercase bg-indigo-50 px-1.5 py-0.5 rounded">
+                  4-Step Login
+                </span>
+                <p className="font-extrabold text-xs text-slate-900 mt-1 group-hover:text-indigo-600">
+                  🔑 Role Identity
+                </p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Code → Role → Person → Pass</p>
+              </div>
+              <span className="text-[10px] font-bold text-indigo-600 mt-2 flex items-center gap-1">
+                Open Login →
+              </span>
+            </Link>
+
+            <Link
+              href="/owner/dashboard"
+              className="p-3 bg-white border border-slate-200 hover:border-indigo-600 rounded-xl flex flex-col justify-between shadow-sm transition group"
+            >
+              <div>
+                <span className="text-[9px] font-black text-slate-700 uppercase bg-slate-100 px-1.5 py-0.5 rounded">
+                  Owner / Mgr
+                </span>
+                <p className="font-extrabold text-xs text-slate-900 mt-1 group-hover:text-indigo-600">
+                  🏨 Desk PMS & POS
+                </p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Freeze, Split checkout, Khata</p>
+              </div>
+              <span className="text-[10px] font-bold text-indigo-600 mt-2 flex items-center gap-1">
+                Open PMS →
+              </span>
+            </Link>
+
+            <Link
+              href="/kitchen"
+              className="p-3 bg-white border border-slate-200 hover:border-amber-600 rounded-xl flex flex-col justify-between shadow-sm transition group"
+            >
+              <div>
+                <span className="text-[9px] font-black text-amber-800 uppercase bg-amber-50 px-1.5 py-0.5 rounded">
+                  Cook Role
+                </span>
+                <p className="font-extrabold text-xs text-slate-900 mt-1 group-hover:text-amber-700">
+                  🧑‍🍳 7 AM Kitchen BOM
+                </p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Surmai, Pomfret & Veg list</p>
+              </div>
+              <span className="text-[10px] font-bold text-amber-700 mt-2 flex items-center gap-1">
+                Open Kitchen →
+              </span>
+            </Link>
+
+            <Link
+              href="/staff/self-service"
+              className="p-3 bg-white border border-slate-200 hover:border-emerald-600 rounded-xl flex flex-col justify-between shadow-sm transition group"
+            >
+              <div>
+                <span className="text-[9px] font-black text-emerald-800 uppercase bg-emerald-50 px-1.5 py-0.5 rounded">
+                  All Roles
+                </span>
+                <p className="font-extrabold text-xs text-slate-900 mt-1 group-hover:text-emerald-700">
+                  📋 Staff Self-Service
+                </p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Tasks, Upaad ledger, Leaves</p>
+              </div>
+              <span className="text-[10px] font-bold text-emerald-700 mt-2 flex items-center gap-1">
+                My Ledger →
+              </span>
+            </Link>
+          </div>
         </div>
       </div>
 

@@ -44,7 +44,16 @@ def verify_password(password: str, password_hash: str | None) -> bool:
         return False
 
 
-def create_token(*, user_id: uuid.UUID, property_id: uuid.UUID, role: Role, token_type: str) -> tuple[str, int]:
+def create_token(
+    *,
+    user_id: uuid.UUID,
+    property_id: uuid.UUID,
+    role: Role | str,
+    token_type: str,
+    business_category: str | None = None,
+    staff_member_id: uuid.UUID | None = None,
+    enabled_features: list[str] | None = None,
+) -> tuple[str, int]:
     """Returns (jwt, ttl_seconds)."""
     ttl = (
         timedelta(minutes=settings.access_token_minutes)
@@ -52,11 +61,16 @@ def create_token(*, user_id: uuid.UUID, property_id: uuid.UUID, role: Role, toke
         else timedelta(days=settings.refresh_token_days)
     )
     now = datetime.now(UTC)
+    role_str = role.value if hasattr(role, "value") else str(role)
     claims = {
         "sub": str(user_id),
         "pid": str(property_id),
-        "role": role.value,
+        "tenant_id": str(property_id),
+        "role": role_str,
         "typ": token_type,
+        "business_category": business_category,
+        "staff_member_id": str(staff_member_id) if staff_member_id else None,
+        "enabled_features": enabled_features or [],
         "iat": now,
         "exp": now + ttl,
         "jti": uuid.uuid4().hex,

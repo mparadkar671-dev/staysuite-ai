@@ -4,9 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/database/app_database.dart';
 import 'core/hardware/thermal_printer_service.dart';
 import 'features/ai_action_bar/ai_command_bar.dart';
+import 'features/auth_role_login/role_login_dialog.dart';
 import 'features/bookings_walkin/quick_walkin_dialog.dart';
 import 'features/dashboard_calendar/room_calendar_view.dart';
+import 'features/employee_self_service/employee_self_service_dialog.dart';
 import 'features/pos_split_billing/partial_checkout_dialog.dart';
+import 'features/role_dashboards/role_operational_view.dart';
 
 // Riverpod Provider for local Drift database
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -51,6 +54,9 @@ class _PosDashboardPageState extends ConsumerState<PosDashboardPage> {
 
   bool _isBookingFrozen = false;
   RoomEntry? _selectedRoom;
+  String _currentRole = 'OWNER';
+  String _currentStaffName = 'Abhijeet Patil';
+  String _businessCode = 'SS-HM-1001';
 
   @override
   void initState() {
@@ -229,6 +235,44 @@ class _PosDashboardPageState extends ConsumerState<PosDashboardPage> {
                 ],
               ),
               actions: [
+                ActionChip(
+                  avatar: const Icon(Icons.person, size: 14),
+                  label: Text('$_currentStaffName ($_currentRole)'),
+                  backgroundColor: Colors.indigo.shade50,
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => RoleLoginDialog(
+                        currentBusinessCode: _businessCode,
+                        onLoginSuccess: (role, staffName, code) {
+                          setState(() {
+                            _currentRole = role;
+                            _currentStaffName = staffName;
+                            _businessCode = code;
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Switched to $staffName ($role)')),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(width: 8),
+                TextButton.icon(
+                  icon: const Icon(Icons.list_alt, size: 16),
+                  label: const Text('My Tasks & Upaad'),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => EmployeeSelfServiceDialog(
+                        staffName: _currentStaffName,
+                        role: _currentRole,
+                        propertyName: _propertyName,
+                      ),
+                    );
+                  },
+                ),
                 TextButton.icon(
                   icon: const Icon(Icons.flash_on, size: 16),
                   label: const Text('F1 Walk-In'),
@@ -265,13 +309,15 @@ class _PosDashboardPageState extends ConsumerState<PosDashboardPage> {
                   },
                 ),
 
-                // Main Master-Detail Room Calendar View
+                // Role-Specific Operational Dashboard (Homestay / Resort Zero-Rewrite)
                 Expanded(
                   child: StreamBuilder<List<RoomEntry>>(
                     stream: db.watchActiveRooms(_propertyId),
                     builder: (context, snapshot) {
                       final rooms = snapshot.data ?? [];
-                      return RoomCalendarView(
+                      return RoleOperationalView(
+                        activeRole: _currentRole,
+                        propertyId: _propertyId,
                         rooms: rooms,
                         isBookingFrozen: _isBookingFrozen,
                         onToggleFreeze: (frozen) => setState(() => _isBookingFrozen = frozen),

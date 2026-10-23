@@ -6,6 +6,11 @@ class Role(StrEnum):
     SUPER_ADMIN = "SUPER_ADMIN"
     OWNER = "OWNER"
     MANAGER = "MANAGER"
+    STAFF_HOUSEKEEPING = "STAFF_HOUSEKEEPING"
+    WAITER = "WAITER"
+    COOK = "COOK"
+    HELPER = "HELPER"
+    ACCOUNTANT = "ACCOUNTANT"
     STAFF = "STAFF"
 
 
@@ -15,12 +20,21 @@ class BusinessCategory(StrEnum):
     HOTEL = "HOTEL"
     RESTAURANT = "RESTAURANT"
     BAR = "BAR"
+    OTHER_SERVICES = "OTHER_SERVICES"
+
+
+class StaffApprovalStatus(StrEnum):
+    ACTIVE = "ACTIVE"
+    PENDING_OWNER_APPROVAL = "PENDING_OWNER_APPROVAL"
+    REJECTED = "REJECTED"
+    SUSPENDED = "SUSPENDED"
 
 
 class PlanTier(StrEnum):
     TRIAL = "TRIAL"
     STANDARD = "STANDARD"
     PREMIUM = "PREMIUM"
+    ENTERPRISE = "ENTERPRISE"
 
 
 class HousekeepingStatus(StrEnum):

@@ -1,16 +1,41 @@
-﻿StaySuite AI — Master Software Requirements Specification (SRS v4.0)
-Architecture: Flutter (Mobile & Desktop POS) + Next.js 15 (Guest & QR Web) + FastAPI (Modular Monolith) + Drift Local SQLite + PostgreSQL 16
+StaySuite AI — Master Software Requirements Specification (SRS v4.1)
+Architecture: Flutter (StaySuite App Mobile & Desktop) + Next.js 15 (Booking Site & Portals) + FastAPI (Modular Monolith Core Brain) + Drift Local SQLite + PostgreSQL 16
 ________________
-1. Executive Summary & "One Brain, Three Faces" Strategy
-* Core Brain (FastAPI + PostgreSQL): Modular monolith supporting multi-category plugins (Homestay, Resort, Hotel, Restaurant, Bar) without code conflicts.
-* Face 1 — Owner & Manager POS/PMS (Flutter Mobile + Desktop): Offline-first local SQLite (Drift) for <5ms response times and sub-second Bluetooth/USB ESC/POS thermal printing.
-* Face 2 — Guest Zero-Install Web + WhatsApp Bot (Next.js SSR): Direct booking storefront, 30-second walk-in QR self-check-in, 50% UPI advance links, and cut-off-enforced meal pre-orders.
-* Face 3 — Staff & Kitchen Interface (Door QR + WhatsApp): Laminated room door QR stickers for 1-second room status updates and automated morning Fish/Veg Market lists.
-2. Core Modules
-1. Module 1: Business-Category Plugin System, Dynamic AC/Non-AC Tariffs, Extra Person Fee Waive, 360° Media & AI Settings Search Bar.
-2. Module 2: Zero-Commission Direct Storefront, Dual Walk-In QR Mode, 1-Click Room Freeze & Booking.com 50% UPI Advance Bridge.
-3. Module 3: Category-Aware Dining (24h/4h Cut-Offs), Unified Menu Catalog & Deterministic Recipe BOM Market Calculator.
-4. Module 4 & 5: Vyapar++ Split-Folio Partial Room Checkout, Bluetooth/USB Thermal KOT Printing, Customer Khata & 10-Category Auto-Kirana Tracker.
-5. Module 6: Legal-Grade Police Register Export, Form-C Assistant & Role-Based ID Redaction ([Aadhaar Redacted] for staff/managers).
-6. Module 7: Behind-the-Door QR Housekeeping & 5-Mode Staff Payroll + Upaad (Advance) Ledger.
-7. Module 8: 30-Day Full Trial, Super Admin Custom Deal/AMC Engine & Zero-MDR Dynamic UPI QR Payments.
+
+1. Complete 3-Pillar Ecosystem Overview
+Pillar 1: Main Business Model (Super Admin / SaaS Control Plane)
+* Property Onboarding & Provisioning: Approves new registrations across 6 categories (Homestay, Resort, Hotel, Restaurant, Bar, Other Services) and assigns unique Business Codes (e.g. SS-HM-1001).
+* Subscription Plan & Feature Entitlement Matrix: Manages plans (Trial, Standard, Premium, Custom Enterprise) and controls feature flags per tenant.
+* Platform Analytics & Global Kill-Switch: Live P&L analytics, subscription fee logs, and 1-click global kill-switch (PATCH /api/v1/superadmin/properties/{id}/status) to suspend/freeze properties or modules.
+
+Pillar 2: Booking Site (Public Marketplace, Owner Onboarding & Customer Portal)
+* Multi-Category Public Marketplace (/ and /explore/[category]): Live property showcase with real-time room availability, AC/Non-AC pricing, 24h/4h meal cut-off policies, and amenities.
+* Self-Service Owner Listing Wizard (/list-your-property): 3-step wizard with category selection, KYC, subscription payment, and instant issuance of Business Code (SS-XXXX) + Owner credentials.
+* Customer Booking & Profile Portal (/property/[slug] and /customer/dashboard): Mobile/Email OTP login, 50% UPI advance checkout, instant receipts, live confirmation tracking, and post-stay reviews.
+
+Pillar 3: StaySuite App (Multi-Tenant, Role-Based Operating System)
+* Zero-Rewrite Conditional Category Programming: Single unified codebase where modules (Rooms AC, Pre-Order BOM, Split POS, Housekeeping QR, Staff Upaad, Revenue P&L) are dynamically enabled via runtime feature flags (has_feature) based on category defaults and active subscription plan overrides.
+* Multi-Person Role Login: 4-step login (Business Code -> Category Role -> Person Identity -> Password/OTP) supporting multiple workers under the same role (e.g., 3 Cooks, 4 Cleaners, 2 Waiters).
+* Role-Specific Dashboards & Universal Self-Service: Dedicated dashboards for Owner, Manager, Housekeeping, Waiter, Cook, Helper, and Accountant, plus universal self-service tabs for My Tasks, My Salary/Upaad, and Leave Requests.
+
+________________
+
+2. Zero-Rewrite Conditional Category Matrix
+Module / Feature Flag                       | Homestay (#1 Ref) | Hotel / Resort | Restaurant / Bar | Other Services
+--------------------------------------------+-------------------+----------------+------------------+----------------
+MOD_ROOMS_AC_TOGGLE (Rooms, AC/Non-AC)      | Enabled           | Enabled        | Hidden           | Optional
+MOD_FOOD_CUTOFF_BOM (24h/4h Cutoff & BOM)   | Enabled           | Optional       | Hidden           | Hidden
+MOD_KOT_WAITER (Table/Room KOTs & Waiters)  | Optional          | Enabled        | Enabled          | Hidden
+MOD_POS_SPLIT_BILLING (Partial Split Bill)  | Enabled           | Enabled        | Enabled (Tables) | Enabled
+MOD_HOUSEKEEPING_QR (Door Clean/Dirty QR)   | Enabled           | Enabled        | Hidden           | Optional
+MOD_EXPENSE_KIRANA (Kirana & Expense P&L)   | Enabled           | Enabled        | Enabled          | Enabled
+MOD_STAFF_UPAAD_LEAVE (Payroll & Leave)     | Enabled (All)     | Enabled (All)  | Enabled (All)    | Enabled (All)
+
+________________
+
+3. 4-Step Multi-Person Role Login Specification
+* Step 1: Input Business ID (e.g. SS-HM-1001) -> Validates tenant and retrieves category configuration.
+* Step 2: Select Role -> Dynamically returns active roles for that category (Owner, Manager, Staff, Waiter, Cook, Helper, Accountant).
+* Step 3: Select Person -> Lists verified team members registered under that role (e.g., Cook -> [Vedika, Suresh]).
+* Step 4: Password / OTP -> Authenticates the exact worker and issues a scoped JWT containing tenant_id, role, staff_member_id, and enabled_features[].
+* Dual Onboarding: Flow A (Owner creates directly in StaySuite App, ACTIVE) and Flow B (Staff self-registers via app, PENDING_OWNER_APPROVAL until approved by Manager/Owner).
