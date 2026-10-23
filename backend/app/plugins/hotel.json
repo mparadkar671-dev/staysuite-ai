@@ -1,0 +1,14 @@
+{
+  "category": "HOTEL",
+  "label": "Boutique Hotel",
+  "enabled_modules": ["rooms", "bookings", "dining_bom", "billing_pos", "inventory_expense", "compliance_kyc", "staff_hr", "ai_copilot"],
+  "hidden_modules": ["bar_inventory"],
+  "rules": {
+    "ac_toggle_enabled": false,
+    "pre_arrival_food_cutoff_hours": 0,
+    "in_stay_food_cutoff_hours": 0,
+    "require_food_rules_acknowledgement": false,
+    "advance_payment_percent": 25,
+    "extra_person_fee_waivable": true
+  }
+}

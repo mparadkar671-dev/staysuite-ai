@@ -1,0 +1,14 @@
+{
+  "category": "BAR",
+  "label": "Bar & Lounge",
+  "enabled_modules": ["dining_bom", "billing_pos", "inventory_expense", "bar_inventory", "staff_hr", "ai_copilot"],
+  "hidden_modules": ["rooms", "bookings", "compliance_kyc"],
+  "rules": {
+    "ac_toggle_enabled": false,
+    "pre_arrival_food_cutoff_hours": 0,
+    "in_stay_food_cutoff_hours": 0,
+    "require_food_rules_acknowledgement": false,
+    "advance_payment_percent": 0,
+    "extra_person_fee_waivable": false
+  }
+}

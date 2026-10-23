@@ -1,0 +1,205 @@
+<USER_REQUEST>
+# SOFTWARE REQUIREMENTS SPECIFICATION (SRS v4.0)
+**Project Title:** StaySuite AI — Offline-First Hospitality & Resort Operating System
+**Selected Architecture (Path A):** Flutter (Android/iOS/Windows/macOS) + Next.js (Guest & QR Web) + FastAPI (Modular Monolith) + Drift Local SQLite + PostgreSQL
+**Target Market:** Coastal Homestays (Konkan Belt), Beach Resorts, Boutique Hotels, Restaurants & Bars
+
+---
+
+## 1. Executive Summary & System Overview
+StaySuite AI is an offline-first, multi-category SaaS platform engineered for Indian homestays and resorts. It eliminates reception bottlenecks, unpaid OTA bookings, kitchen food waste, and checkout billing chaos using a **"One Brain, Three Faces"** architecture:
+1. **The Core Brain (FastAPI + PostgreSQL):** A modular monolith backend supporting multi-category plugins (Homestay, Resort, Hotel, Restaurant, Bar) without code conflicts.
+2. **Face 1 — Owner & Manager POS/PMS App (Flutter Native Mobile + Desktop):** A single Dart codebase compiled natively to Android, iOS, Windows, and macOS with an embedded local SQLite database (`Drift`) for <5ms response times, 100% offline billing, and sub-second Bluetooth/USB ESC/POS thermal printing.
+3. **Face 2 — Guest Zero-Install Web + WhatsApp Bot (Next.js SSR + Meta Cloud API):** Fast mobile web links for direct bookings, 30-second walk-in QR self-check-in, 50% UPI advance payments, and cut-off-enforced meal pre-ordering.
+4. **Face 3 — Staff & Kitchen Frictionless Interface (Door QR + WhatsApp + Marathi/Hindi Audio):** Behind-the-door laminated QR stickers for 1-second room cleaning updates and automated morning market shopping lists.
+
+---
+
+## 2. Module-by-Module Functional Requirements
+
+### Module 1: Business-Category Plugin Engine, Dynamic Rooms & 360° Media
+* **FR-1.1 Category Plugin System:** Onboarding configures `properties.business_config` (JSONB), activating Homestay rules (24-hr/4-hr meal cut-offs, AC/Non-AC toggle) while hiding unrelated modules (e.g., Bar liquor inventory) until enabled.
+* **FR-1.2 AC vs. Non-AC Dynamic Tariff Toggle:** Every room stores `base_tariff_ac` and `base_tariff_non_ac`. Toggling "AC Required" off on the booking/check-in screen recalculates the folio immediately and dispatches a staff alert to keep the AC off.
+* **FR-1.3 Extra Person & Driver Dormitory Fee Waive:** Supports fixed charges for extra mattresses and driver beds with a 1-click Manager/Owner `[Waive in Bill]` toggle during checkout.
+* **FR-1.4 Plan-Gated Visual Media:**
+  * *Standard Tier:* Fast WebP photo gallery + room floor/bed metadata.
+  * *Premium Tier:* Interactive 360° equirectangular panorama viewer, Instagram Creator Reel embeds, and Google Street View integration.
+* **FR-1.5 Global AI Settings Search & Action Bar:** A command bar at the top of the Flutter app accepts voice/text in Marathi, Hindi, or English (e.g., *"Freeze rooms for Dec 24"*, *"Change Sea-Facing price to ₹4,000"*) and surfaces a 1-click confirmation action card.
+
+### Module 2: Direct Storefront, Walk-In QR & Booking.com "Unpaid" Bridge
+* **FR-2.1 Zero-Commission Storefront:** Auto-generates `staysuite.in/{property-slug}` for Google Maps, Instagram bio, and WhatsApp auto-replies.
+* **FR-2.2 Dual Walk-In Desk Mode:** Managers can log a walk-in via a 3-field quick form on the Flutter app OR have the guest scan a Reception QR code to submit details and ID on their phone in 30 seconds.
+* **FR-2.3 1-Click Emergency Room Freeze:** A master toggle in the Flutter app immediately blocks selected rooms on the direct storefront and pushes zero-availability updates to connected OTAs.
+* **FR-2.4 Automated OTA Unpaid Booking Workflow:** When an unpaid Booking.com reservation arrives (via Email Parser / iCal in Phase 1, or Channex.io two-way API in Phase 2), the system automatically sends a WhatsApp message to the guest with:
+  1. A 50% UPI Advance Payment Link, and
+  2. A mandatory Homestay Food Pre-Order Rule acknowledgment checkbox.
+
+### Module 3: Category-Aware Dining, Unified Catalog & Market Calculator
+* **FR-3.1 Automated Meal Cut-Off Gatekeeper:** Enforces 24-hour pre-arrival and 4-hour in-stay ordering windows for fresh seafood/thalis. Late orders display: *"Fresh kitchen prep is closed for this slot — Request Manager Override OR View Instant Snacks."*
+* **FR-3.2 Single Unified Catalog:** Adding or updating a dish in the Flutter app updates both the Next.js Guest Menu and the POS Billing catalog simultaneously.
+* **FR-3.3 Deterministic Recipe BOM Market Calculator:** Uses exact PostgreSQL arithmetic (`Confirmed Orders × Recipe BOM Weight - Current Kitchen Stock`) to generate a morning Market Shopping List for the buyer (Abhijeet) grouped by Fish Market and Veg Market, and Kitchen Order Tickets (KOT) for the cook (Vedika).
+
+### Module 4 & 5: Vyapar++ Split Billing, Thermal KOT, Khata & Auto-Kirana
+* **FR-4.1 Partial Room Checkout (Group Split Billing):** Decouples `bookings` from `booking_room_allocations` and `folios`. If a group books 3 rooms and 1 room checks out a day early, the Manager performs a Partial Checkout for that single room while keeping the other 2 rooms active.
+* **FR-4.2 Sub-Second Bluetooth & USB ESC/POS Thermal Printing:** Native byte-stream printing on 58mm (2-inch) and 80mm (3-inch) thermal printers for Kitchen KOTs and Final Checkout Bills with an embedded Dynamic UPI QR Code.
+* **FR-4.3 Customer Khata (Credit Ledger):** Moves unpaid balances of trusted guests to a credit ledger that sends automated WhatsApp UPI payment reminders until settled.
+* **FR-5.1 10-Category Expense Tracker & Auto-Kirana List:** Tracks Fish/Meat, Vegetables, Kirana, Room Amenities, Cleaning Supplies, Petrol, Electricity, Water, Wi-Fi, and LPG. Automatically compiles a Kirana Purchase List whenever stock falls below `min_threshold_qty`.
+
+### Module 6: Legal-Grade Police Compliance & Role-Based Privacy Masking
+* **FR-6.1 Strict Role-Based ID Redaction:**
+  * *Manager & Staff Login:* Sensitive government IDs are strictly hidden and displayed only as `[Aadhaar Redacted]` alongside verification status so temporary staff cannot misuse guest data.
+  * *Owner & Police Inspection Portal:* Protected by 2FA and audit logs, with 1-click official Police Register PDF/Excel export and Foreign Guest Form-C alerts.
+
+### Module 7: Frictionless Staff Door QR, WhatsApp Tasks & Payroll/Upaad
+* **FR-7.1 Behind-the-Door QR Housekeeping:** Scanning the laminated QR sticker inside a room door opens a mobile web page with Marathi/Hindi voice support and a giant `[ 🟢 Room Cleaned ]` button that flips the owner's dashboard from Red to Green in 1 second.
+* **FR-7.2 Multi-Model Payroll & Upaad (Advance) Ledger:** Supports Monthly Fixed, Daily Wage, Off-Season Part-Time, Per-Room Bonus, and Peak-Season Intern Stipends, automatically deducting mid-month cash advances (*Upaad*) from final payouts.
+
+### Module 8: Startup SaaS Pricing, 30-Day Trial & Zero-MDR Payments
+* **FR-8.1 Trial, Custom Deals & Referral Engine:** 30-day full-feature trial, Super Admin custom Setup Fee + Annual Maintenance Contract (AMC) overrides, and automated Owner-to-Owner Referral discounts.
+* **FR-8.2 Dual Payment Architecture:** Direct Dynamic UPI QR (`upi://pay?...`) for 0% MDR guest-to-owner bill payments, plus Razorpay/Cashfree Subscriptions for automated SaaS recurring billing and instant webhook-verified OTA advances.
+
+
+staysuite-monorepo/
+├── .github/
+│   └── workflows/
+│       ├── backend-ci-cd.yml          # FastAPI pytest + Docker deploy
+│       ├── web-ci-cd.yml              # Next.js build + Vercel/Cloudflare deploy
+│       └── flutter-release.yml        # Builds Android APK/AAB + Windows EXE installer
+├── docker-compose.yml                 # Local dev: Postgres 16 + Redis + FastAPI
+├── backend/                           # [BRAIN] FastAPI Modular Monolith
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── alembic/                       # Database migrations
+│   └── app/
+│       ├── main.py                    # FastAPI entry + CORS + WebSocket manager
+│       ├── core/                      # config.py, security.py, db.py, sync_engine.py
+│       ├── plugins/                   # Category JSON schemas (homestay, resort, bar)
+│       └── modules/
+│           ├── properties/            # router.py, models.py, schemas.py, service.py
+│           ├── bookings/
+│           ├── dining_bom/
+│           ├── billing_pos/
+│           ├── inventory_expense/
+│           ├── compliance_kyc/
+│           ├── staff_hr/
+│           ├── ai_copilot/
+│           └── saas_admin/
+├── pos_app/                           # [FACE 1] Flutter Mobile (Android/iOS) + Desktop (Win/Mac)
+│   ├── pubspec.yaml
+│   └── lib/
+│       ├── main.dart
+│       ├── core/
+│       │   ├── database/              # Drift SQLite tables & DAOs (app_database.dart)
+│       │   ├── sync/                  # Outbox queue & Delta Pull/Push worker
+│       │   ├── hardware/              # Bluetooth + USB ESC/POS Thermal Printer manager
+│       │   └── network/               # Dio HTTP client + WebSocket listener
+│       └── features/
+│           ├── dashboard_calendar/
+│           ├── bookings_walkin/
+│           ├── pos_split_billing/
+│           ├── dining_market_bom/
+│           ├── inventory_kirana/
+│           ├── staff_upaad/
+│           └── ai_action_bar/
+└── guest_qr_web/                      # [FACE 2 & 3] Next.js 15 Guest Storefront & Door QR
+    ├── package.json
+    ├── next.config.ts
+    └── src/
+        └── app/
+            ├── [propertySlug]/        # Direct Booking Storefront + 360 Pannellum Viewer
+            ├── checkin/[qrToken]/     # 30-Sec Reception Walk-in Self-Check-in
+            ├── menu/[bookingToken]/   # Cut-Off Enforced Food Pre-Order Menu
+            └── q/rm/[doorQrToken]/    # 1-Tap Staff "Room Cleaned" & Issue Page
+
+
+PART 3: Offline Sync & Thermal Printer Connection Architecture
+3.1 How Local SQLite (Drift) Syncs with Cloud PostgreSQL (FastAPI)
+To ensure the Flutter app works smoothly during coastal internet blackouts and syncs without data loss:
+
+Every Table Has 3 Sync Columns: updated_at (TIMESTAMPTZ), is_deleted (BOOLEAN), and sync_status ('SYNCED' | 'PENDING_PUSH').
+
+Local Write + Outbox Queue: When the Manager creates a walk-in booking, adds food to a folio, or performs a Partial Checkout, Flutter writes directly to the local Drift SQLite database (<5ms) and inserts a JSON mutation event into the local sync_outbox table.
+
+Push Engine (POST /api/v1/sync/push): Whenever connectivity_plus detects internet access, the background sync worker sends batched sync_outbox mutations to FastAPI in chronological order. FastAPI applies them inside an atomic PostgreSQL transaction and returns 200 OK.
+
+Delta Pull Engine (GET /api/v1/sync/pull?since=last_pulled_timestamp): Every 30 seconds (or immediately when triggered by a FastAPI WebSocket event like a guest scanning a Door QR), Flutter fetches only records where updated_at > last_pulled_timestamp and upserts them into local SQLite.
+
+3.2 Unified Thermal Printer Pipeline (Mobile Bluetooth + Desktop USB)
+Step 1 (Byte Generation): Using esc_pos_utils_plus, a single ReceiptGenerator class in Dart converts the KOT or Split Checkout Bill (including the native GS ( k UPI QR command) into a List<int> raw ESC/POS byte array.
+
+Step 2 (Platform Hardware Router):
+
+if (Platform.isAndroid || Platform.isIOS) ➔ Sends List<int> bytes over Bluetooth Classic/BLE via print_bluetooth_thermal.
+
+if (Platform.isWindows || Platform.isMacOS) ➔ Sends List<int> bytes directly to the USB/COM/Spooler port via flutter_pos_printer_platform_image_3.
+
+PART 4: Master AI Coding Prompts (Copy-Paste into Cursor / Windsurf / Claude Code)
+Feed these 4 sequential prompts into your AI IDE one by one to generate the entire production codebase cleanly.
+
+Prompt 1: Initialize Monorepo, Docker & FastAPI Core + Sync Engine
+Copy & Paste Prompt 1:
+
+Plaintext
+Act as a Principal Full-Stack Architect. We are building "StaySuite AI", an offline-first multi-tenant SaaS Hospitality POS & PMS using a Monorepo architecture (`backend/` in Python FastAPI + Async SQLAlchemy + PostgreSQL, `pos_app/` in Flutter for Mobile/Desktop with Drift SQLite, and `guest_qr_web/` in Next.js 15).
+
+Task 1: Generate the root `docker-compose.yml` configuring PostgreSQL 16, Redis 7, and the FastAPI backend container.
+Task 2: Inside `backend/`, generate the complete FastAPI modular monolith scaffolding with async SQLAlchemy 2.0 (`app/core/db.py`), JWT + RBAC middleware (`app/core/security.py`), and Alembic configuration.
+Task 3: Generate the SQLAlchemy models in `app/modules/` for:
+1. `properties` (with `business_category`, `business_config` JSONB, `upi_vpa`, `is_booking_frozen`)
+2. `rooms` (with `base_tariff_ac`, `base_tariff_non_ac`, `extra_mattress_charge`, `driver_bed_charge`, `housekeeping_status`, `door_qr_token`, `media_config` JSONB)
+3. `bookings`, `booking_room_allocations`, and `folios` (decoupled so 1 room out of a 3-room booking can perform a Partial Room Checkout)
+4. `inventory_items`, `menu_items`, and `recipe_bom`
+5. `guest_kyc_records` (strictly storing `[Aadhaar Redacted]` in `masked_id_display` for Manager/Staff roles, never raw restricted ID digits)
+6. `staff_upaad_ledger`
+Every table must include `updated_at`, `is_deleted`, and `property_id` for multi-tenant isolation and delta sync.
+Task 4: Implement `POST /api/v1/sync/push` and `GET /api/v1/sync/pull?since=TIMESTAMP` in `app/core/sync_engine.py` + a real-time WebSocket broadcaster per `property_id`. Write clean, production-ready code with zero placeholders.
+Prompt 2: Generate FastAPI Domain Business Logic (BOM Calculator, Split Checkout & OTA Bridge)
+Copy & Paste Prompt 2:
+
+Plaintext
+Continue in `backend/app/modules/`. Implement the complete FastAPI routers, Pydantic v2 schemas, and business logic services for:
+1. `billing_pos`: Implement `POST /api/v1/folios/{allocation_id}/partial-checkout` which calculates room nights (prorating AC vs Non-AC toggles), adds assigned KOT food items, applies the 1-click `waive_extra_person_fee` discount if toggled, generates a Dynamic UPI QR string (`upi://pay?pa={property_upi}&pn={name}&am={balance}&cu=INR`), and closes only that room allocation while keeping sibling rooms active. Also implement Customer Khata transfer (`MOVED_TO_KHATA`).
+2. `dining_bom`: Implement the 24-hour pre-arrival and 4-hour in-stay meal cut-off validator, and implement `GET /api/v1/dining/market-procurement?date=YYYY-MM-DD&slot=LUNCH` using deterministic SQL aggregation (`SUM(order_qty * bom_qty_per_serving) - current_stock`) grouped by `FISH_MEAT` and `VEG_MARKET`.
+3. `bookings`: Implement `POST /api/v1/webhooks/ota-ingest` to ingest unpaid Booking.com reservations, mark status as `PENDING_ADVANCE`, and trigger a Meta WhatsApp Cloud API payload containing a 50% UPI advance payment link and homestay food rule acknowledgment.
+4. `ai_copilot`: Implement `POST /api/v1/copilot/parse-command` using `google-genai` (Gemini 2.5 Flash) with Structured Outputs to parse natural language owner commands (e.g., "Freeze all rooms for Dec 24", "Change Deluxe AC tariff to 4000") into executable API action payloads.
+Prompt 3: Generate Flutter Mobile + Desktop POS App (Drift SQLite + ESC/POS Thermal Printing)
+Copy & Paste Prompt 3:
+
+Plaintext
+Act as a Senior Flutter Mobile & Desktop Engineer. Inside `pos_app/`, generate the production Flutter application targeting Android, iOS, Windows, and macOS using `flutter_riverpod` and `drift` (SQLite).
+
+Task 1 (`lib/core/database/app_database.dart`): Define the Drift SQLite tables mirroring our backend (`Rooms`, `Bookings`, `BookingRoomAllocations`, `Folios`, `MenuItems`, `StaffUpaadLedger`, and `SyncOutbox`). Write the DAO methods so every UI mutation writes to Drift in <5ms and queues an entry in `SyncOutbox`.
+Task 2 (`lib/core/sync/sync_service.dart`): Build the background sync engine using `dio`, `connectivity_plus`, and `web_socket_channel` to push `SyncOutbox` mutations when online and pull delta changes into Drift.
+Task 3 (`lib/core/hardware/thermal_printer_service.dart`): Build a unified ESC/POS raw byte generator using `esc_pos_utils_plus` that formats 58mm (2-inch) and 80mm (3-inch) Kitchen Order Tickets (KOT) for Vedika and Final Split-Checkout Bills with native ESC/POS QR codes (`GS ( k`). Route printing automatically to Bluetooth (`print_bluetooth_thermal`) on Android/iOS and USB/Spooler (`flutter_pos_printer_platform_image_3`) on Windows/macOS, plus desktop keyboard shortcuts (`F1` Quick Walk-In, `F2` Print KOT, `F4` Partial Checkout, `Ctrl+K` AI Settings Search Bar).
+Task 4 (`lib/features/`): Build the responsive Master-Detail UI (adaptive layout for mobile portrait and desktop widescreen) for the Room Calendar + 1-Click Freeze toggle, AC/Non-AC Dynamic Price Toggle, Partial Room Checkout screen, and Privacy-Safe Walk-In ID Scanner (using `google_mlkit_text_recognition` on-device to redact restricted government IDs to `[Aadhaar Redacted]` before saving).
+Prompt 4: Generate Next.js 15 Guest Storefront, Self-Check-in QR & Door Housekeeping QR Web App
+Copy & Paste Prompt 4:
+
+Plaintext
+Inside `guest_qr_web/`, build a lightweight, ultra-fast Next.js 15 (App Router + Tailwind CSS) application for zero-install mobile web access on 3G/4G coastal networks:
+1. `/[propertySlug]/page.tsx`: Zero-commission Direct Booking Storefront with AC/Non-AC live price checkbox, plan-gated 360° Interactive Room Panorama Viewer (`pannellum-react`), Instagram Reel embeds, and instant UPI advance checkout.
+2. `/checkin/[qrToken]/page.tsx`: 30-second Reception Walk-In Self-Check-in form where guests enter their details, accept Homestay Food Rules, and snap their ID card with automatic client-side canvas redaction for restricted IDs.
+3. `/menu/[bookingToken]/page.tsx`: Guest Food Pre-Order Menu that dynamically checks `pre_arrival_food_cutoff_hours` (24h) and `in_stay_food_cutoff_hours` (4h). If ordering after cut-off, render the "Fresh kitchen prep is closed — Request Manager Override or View Instant Snacks" screen.
+4. `/q/rm/[doorQrToken]/page.tsx`: Frictionless Housekeeping Door QR page in Marathi, Hindi, and English with Web Speech API audio playback and two giant buttons: `[ 🟢 खोली साफ झाली (Room Cleaned) ]` and `[ 🛠️ बिघाड नोंदवा (Report Issue) ]`.
+PART 5: Git Workflow, CI/CD Pipelines & Cloud Hosting Blueprint
+5.1 Git Branching Strategy
+Use a clean 3-branch trunk workflow:
+
+main ➔ Production branch (auto-deploys to live cloud servers and builds signed Flutter Android APK/AAB + Windows .exe installer).
+
+staging ➔ Pre-production testing branch (used to test new features before pushing to your homestay owner).
+
+feat/* (e.g., feat/split-checkout, feat/bom-calculator) ➔ Short-lived feature branches merged via Pull Requests.
+
+5.2 Automated CI/CD Pipeline (.github/workflows/deploy-all.yml)
+Create this file in .github/workflows/deploy-all.yml to automatically test your backend, deploy your web app, and compile both your Android APK and Windows Desktop .exe POS App on every push to main:
+
+
+5.3 Where to Host Everything (Best Speed & Lowest Cost in India)To keep latency under 30ms for Konkan/Maharashtra resorts while keeping your monthly cloud bill near ₹0 to ₹1,500/month during your initial 1–10 properties:ComponentRecommended Hosting ProviderServer RegionMonthly Cost (Startup Stage)Why This Provider WinsPostgreSQL 16 + Encrypted ID StorageSupabase (or Neon.tech)Mumbai (ap-south-1)Free Tier (scales to $25/mo Pro when you cross 10+ resorts)Managed PostgreSQL + daily backups + S3-compatible encrypted bucket for masked guest ID uploads in Mumbai.FastAPI Backend + Redis + Celery WorkerRailway.app (or Hetzner Cloud / AWS Lightsail Mumbai)Singapore / Mumbai$5/month (~₹420/mo)Zero-config Docker deployment from GitHub, built-in Redis for background tasks (7 AM Market List cron job), and automatic HTTPS.Next.js Guest Storefront & Door QR WebVercel (or Cloudflare Pages)Global Edge (Mumbai PoP)₹0 (Free Tier)Serves your Guest QR menus and Door QR pages from Mumbai edge servers in <50ms with automatic SSL.Flutter Desktop & Android UpdatesGitHub Releases + Cloudflare R2Global CDN₹0 (Free Tier)Host your Windows .exe installer and Android .apk for direct 1-click download by resort owners without waiting 7 days for Play Store review during pilot testing.WhatsApp AutomationMeta WhatsApp Cloud API (Direct)Cloud API₹0 platform fee (pay only Meta per-conversation charges)Avoids ₹2,500/month middleman fees from Wati/Interakt by calling graph.facebook.com directly from FastAPI.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-10-21T23:52:00+05:30.
+</ADDITIONAL_METADATA>
+<USER_SETTINGS_CHANGE>
+The user changed setting `Model Selection` from None to Claude Sonnet 5.5 (High). No need to comment on this change if the user doesn't ask about it. If reporting what model you are, please use a human readable name instead of the exact string.
+</USER_SETTINGS_CHANGE>

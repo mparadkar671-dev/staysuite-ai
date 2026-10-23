@@ -1,0 +1,14 @@
+{
+  "category": "HOMESTAY",
+  "label": "Coastal Homestay",
+  "enabled_modules": ["rooms", "bookings", "dining_bom", "billing_pos", "inventory_expense", "compliance_kyc", "staff_hr", "ai_copilot"],
+  "hidden_modules": ["bar_inventory"],
+  "rules": {
+    "ac_toggle_enabled": true,
+    "pre_arrival_food_cutoff_hours": 24,
+    "in_stay_food_cutoff_hours": 4,
+    "require_food_rules_acknowledgement": true,
+    "advance_payment_percent": 50,
+    "extra_person_fee_waivable": true
+  }
+}
