@@ -1,0 +1,15 @@
+﻿StaySuite AI — Monorepo Codebase Structure, AI Build Prompts & Hosting Guide
+1. Monorepo Directory Structure
+staysuite-monorepo/
+├── .github/workflows/         # CI/CD for FastAPI, Next.js, Android APK & Windows EXE
+├── docker-compose.yml         # Local dev & Coolify production stack
+├── backend/                   # FastAPI Modular Monolith + SQLAlchemy + Alembic
+├── pos_app/                   # Flutter Mobile (Android/iOS) & Desktop (Win/Mac) + Drift SQLite
+└── guest_qr_web/              # Next.js 15 Guest Storefront, Walk-in QR & Door Housekeeping QR
+
+2. Offline Sync & Hardware Printing Architecture
+* Local-First Sync: Every UI action writes to local Drift SQLite in <5ms and queues mutations in sync_outbox. Background worker pushes to POST /api/v1/sync/push and pulls deltas from GET /api/v1/sync/pull.
+* Thermal Printing: Raw ESC/POS byte stream generated via esc_pos_utils_plus, routed to Bluetooth on Android/iOS and USB/Spooler on Windows/macOS.
+3. Recommended Cloud Hosting Strategy
+* Pilot Stage (1–5 Homestays): Railway ($5/mo FastAPI + Redis) + Supabase Mumbai (Free PostgreSQL) + Vercel (Free Next.js) + Cloudflare R2 (Free 360° Media Storage).
+* Scale Stage (5–100+ Resorts): Mumbai Linux KVM VPS running Coolify (Docker Compose) + Cloudflare R2 automated daily database backups.

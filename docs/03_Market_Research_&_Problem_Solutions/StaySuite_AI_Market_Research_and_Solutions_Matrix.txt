@@ -1,0 +1,14 @@
+﻿StaySuite AI — Konkan Homestay Market Research & Problem-Solution Matrix
+1. Core Ground-Level Problems Solved
+Ground Problem in Homestays & Resorts
+	StaySuite AI Engineered Solution
+	Guests bargain at check-in for Non-AC room rates; staff forget to switch off AC.
+	Dynamic AC/Non-AC Tariff toggle on folio + automated WhatsApp task to staff.
+	Booking.com guests book without paying advance and cancel last minute or demand fish thalis at 10 PM.
+	Automated WhatsApp bridge sends 50% UPI advance link + mandatory 24-hr food rule confirmation immediately upon booking.
+	Manual morning math to calculate how much Surmai, Prawns, and vegetables to buy from the market.
+	Deterministic SQL Recipe BOM calculator totals confirmed orders minus kitchen stock and sends a 7 AM WhatsApp market list to the buyer.
+	1 room out of a 3-room family group wants to check out a day early.
+	Decoupled Split-Folio Partial Room Checkout settles a single room independently while keeping the other rooms active.
+	Housekeeping staff do not open complex apps to update room cleaning status.
+	Laminated QR sticker behind every room door with Marathi/Hindi voice support and 1-tap "Room Cleaned" button.

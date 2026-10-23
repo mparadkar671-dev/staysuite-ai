@@ -1,0 +1,16 @@
+﻿StaySuite AI — Master Software Requirements Specification (SRS v4.0)
+Architecture: Flutter (Mobile & Desktop POS) + Next.js 15 (Guest & QR Web) + FastAPI (Modular Monolith) + Drift Local SQLite + PostgreSQL 16
+________________
+1. Executive Summary & "One Brain, Three Faces" Strategy
+* Core Brain (FastAPI + PostgreSQL): Modular monolith supporting multi-category plugins (Homestay, Resort, Hotel, Restaurant, Bar) without code conflicts.
+* Face 1 — Owner & Manager POS/PMS (Flutter Mobile + Desktop): Offline-first local SQLite (Drift) for <5ms response times and sub-second Bluetooth/USB ESC/POS thermal printing.
+* Face 2 — Guest Zero-Install Web + WhatsApp Bot (Next.js SSR): Direct booking storefront, 30-second walk-in QR self-check-in, 50% UPI advance links, and cut-off-enforced meal pre-orders.
+* Face 3 — Staff & Kitchen Interface (Door QR + WhatsApp): Laminated room door QR stickers for 1-second room status updates and automated morning Fish/Veg Market lists.
+2. Core Modules
+1. Module 1: Business-Category Plugin System, Dynamic AC/Non-AC Tariffs, Extra Person Fee Waive, 360° Media & AI Settings Search Bar.
+2. Module 2: Zero-Commission Direct Storefront, Dual Walk-In QR Mode, 1-Click Room Freeze & Booking.com 50% UPI Advance Bridge.
+3. Module 3: Category-Aware Dining (24h/4h Cut-Offs), Unified Menu Catalog & Deterministic Recipe BOM Market Calculator.
+4. Module 4 & 5: Vyapar++ Split-Folio Partial Room Checkout, Bluetooth/USB Thermal KOT Printing, Customer Khata & 10-Category Auto-Kirana Tracker.
+5. Module 6: Legal-Grade Police Register Export, Form-C Assistant & Role-Based ID Redaction ([Aadhaar Redacted] for staff/managers).
+6. Module 7: Behind-the-Door QR Housekeeping & 5-Mode Staff Payroll + Upaad (Advance) Ledger.
+7. Module 8: 30-Day Full Trial, Super Admin Custom Deal/AMC Engine & Zero-MDR Dynamic UPI QR Payments.

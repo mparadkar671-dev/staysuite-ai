@@ -1,0 +1,128 @@
+﻿1. Why There Are No Updates on Your GitHub Profile
+When we check the repository:
+1. No remote is linked yet: git remote -v returned completely empty. Your local folder has a .git database, but it is not connected to any GitHub URL (https://github.com/your-username/your-repo.git).
+2. Initial commit was pending: The files were staged (git add .), and git was waiting on .git/COMMIT_EDITMSG for a commit message (No commits yet).
+3. Nothing has been pushed: Because no remote exists and no commit was sealed, nothing has been sent to GitHub servers.
+________________
+
+
+2. Git Architecture: How Your Code is Structured Across Branches
+As specified in the SRS v4.0 architecture, here is the professional 3-tier trunk branching workflow:
+                 ┌─── feat/backend-core (Prompt 1 & 2) ───┐
+                 ├─── feat/pos-app-flutter (Prompt 3) ────┼──> staging ──> main (Production)
+                 └─── feat/guest-qr-web (Prompt 4) ───────┘
+1. main (Production):
+   * The stable source of truth.
+   * Any commit here triggers production builds and automated CI/CD releases.
+2. staging (Pre-Production):
+   * Integrates features for end-to-end testing (Backend + Flutter + Guest Web) before production.
+3. feat/* (Feature Branches):
+   * Short-lived branches where individual modules are developed in isolation without breaking other work:
+      * feat/backend-core (FastAPI modular monolith + DB + Sync Engine)
+      * feat/pos-flutter (Drift SQLite + ESC/POS thermal printing + POS UI)
+      * feat/guest-qr-web (Next.js 15 Storefront & Door Housekeeping QR)
+________________
+
+
+3. Step-by-Step Commands to Connect and Push to Your GitHub
+Step A: Commit the Current Staged Work Locally
+powershell
+# 1. Stage all pending changes (including latest service fixes)
+git add .
+# 2. Commit with a descriptive message
+git commit -m "feat(backend): initial commit - FastAPI modular monolith, DB models, and sync engine"
+Step B: Create a Repo on GitHub & Link Remote
+1. Go to GitHub and create a new repository (e.g., staysuite-ai or saguntara). Leave it empty (do not check "Add README" or ".gitignore").
+2. Copy the repository URL (https://github.com/<YOUR_USERNAME>/<REPO_NAME>.git).
+3. Link your local repo to GitHub:
+powershell
+# Rename local branch to main (standard default)
+git branch -M main
+# Add the GitHub remote URL
+git remote add origin https://github.com/<YOUR_USERNAME>/<REPO_NAME>.git
+# Verify the remote is set
+git remote -v
+Step C: Push Your Code to GitHub
+powershell
+# Push main branch to GitHub and set upstream tracking (-u)
+git push -u origin main
+________________
+
+
+4. Complete Git Command Cheat Sheet (Managing & Manipulating Code)
+🔍 Status & Inspection
+Command
+	What it Does
+	git status
+	Shows staged, unstaged, and untracked files.
+	git log --oneline --graph --all
+	Displays a visual tree of all commits across all branches.
+	git diff
+	Shows line-by-line changes that are not yet staged.
+	git diff --staged
+	Shows line-by-line changes that are staged for commit.
+	git remote -v
+	Shows all linked remote servers (e.g., GitHub).
+	🌿 Branch Management & Switching
+Command
+	What it Does
+	git branch
+	Lists all local branches (* denotes active branch).
+	git branch -a
+	Lists all local and remote branches.
+	git checkout -b feat/pos-flutter
+	Creates a new branch feat/pos-flutter and switches to it.
+	git switch <branch-name>
+	Modern way to switch between existing branches.
+	git branch -d <branch-name>
+	Deletes a branch locally after it has been merged.
+	📦 Staging & Committing
+Command
+	What it Does
+	git add <file>
+	Stages a specific file.
+	git add .
+	Stages all modified and new files in the current folder.
+	git commit -m "feat: message"
+	Creates a new commit snapshot with a message.
+	git commit --amend
+	Edits the last commit (message or newly staged files).
+	🚀 Syncing with GitHub (Push / Pull / Fetch)
+Command
+	What it Does
+	git push origin <branch-name>
+	Uploads your local commits to GitHub.
+	git push -u origin <branch>
+	Pushes and remembers the default remote tracking branch.
+	git fetch origin
+	Downloads updates from GitHub without altering local files.
+	git pull origin <branch>
+	Fetches and immediately merges remote changes into your local branch.
+	🔀 Merging & Integrating Code
+Command
+	What it Does
+	git merge feat/pos-flutter
+	Merges feat/pos-flutter into your current active branch.
+	git rebase main
+	Replays your current branch commits on top of latest main.
+	git cherry-pick <commit-hash>
+	Applies a specific commit from another branch into your current branch.
+	↩️ Undoing & Discarding Changes
+Command
+	What it Does
+	git restore <file>
+	Discards local uncommitted edits in a file (reverts to last commit).
+	git restore --staged <file>
+	Unstages a file without losing your edits.
+	git stash
+	Temporarily shelves uncommitted changes so you can switch branches cleanly.
+	git stash pop
+	Reapplies shelved changes back into your workspace.
+	git reset --soft HEAD~1
+	Undoes the last commit but keeps all changes staged.
+	git reset --hard HEAD~1
+	Completely wipes the last commit and all its code changes.
+	________________
+
+
+Would you like me to commit the backend changes locally right now so your workspace is clean, or would you like to provide your GitHub repository URL so we can push it together?
