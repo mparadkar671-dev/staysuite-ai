@@ -27,6 +27,7 @@ class FeatureModule(StrEnum):
     MOD_POLICE_KYC_EXPORT = "MOD_POLICE_KYC_EXPORT"
     MOD_AI_COPILOT = "MOD_AI_COPILOT"
     MOD_PANORAMA_360 = "MOD_PANORAMA_360"
+    MOD_360_PANORAMA = "MOD_360_PANORAMA"
 
 
 # Default baseline module entitlements per category
@@ -123,8 +124,27 @@ def resolve_features(
         for feat, is_enabled in custom_overrides.items():
             if is_enabled:
                 modules.add(feat)
+                if feat in ("MOD_PANORAMA_360", "MOD_360_PANORAMA"):
+                    modules.add("MOD_PANORAMA_360")
+                    modules.add("MOD_360_PANORAMA")
             else:
                 modules.discard(feat)
+                if feat in ("MOD_PANORAMA_360", "MOD_360_PANORAMA"):
+                    modules.discard("MOD_PANORAMA_360")
+                    modules.discard("MOD_360_PANORAMA")
+
+    # Harmonize aliases only if not explicitly revoked
+    is_pano_disabled = bool(
+        custom_overrides
+        and (
+            custom_overrides.get("MOD_360_PANORAMA") is False
+            or custom_overrides.get("MOD_PANORAMA_360") is False
+        )
+    )
+    if not is_pano_disabled:
+        if "MOD_PANORAMA_360" in modules or "MOD_360_PANORAMA" in modules:
+            modules.add("MOD_PANORAMA_360")
+            modules.add("MOD_360_PANORAMA")
 
     return modules
 

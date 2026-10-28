@@ -33,6 +33,10 @@ class BookingsService:
         prop = (await session.execute(prop_stmt)).scalar_one_or_none()
         if not prop:
             raise ValueError(f"Property {property_id} not found")
+        if prop.status == "SUSPENDED":
+            raise ValueError("This property is currently suspended by StaySuite Super Admin.")
+        if prop.is_booking_frozen:
+            raise ValueError("Bookings are currently paused for this property.")
 
         # 1. 50% UPI Advance calculation
         advance_required = (req.total_amount * _FIFTY_PERCENT).quantize(Decimal("0.01"))

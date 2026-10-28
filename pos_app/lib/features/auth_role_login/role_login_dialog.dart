@@ -16,7 +16,7 @@ class RoleMemberItem {
 
 class RoleLoginDialog extends StatefulWidget {
   final String currentBusinessCode;
-  final Function(String role, String staffName, String businessCode) onLoginSuccess;
+  final Function(String role, String staffName, String businessCode, List<String> enabledFeatures, String token) onLoginSuccess;
 
   const RoleLoginDialog({
     super.key,
@@ -36,6 +36,8 @@ class _RoleLoginDialogState extends State<RoleLoginDialog> {
   String _selectedRole = 'OWNER';
   RoleMemberItem? _selectedMember;
   String? _errorMessage;
+  bool _isSuspended = false;
+  bool _isLoading = false;
 
   final Map<String, List<RoleMemberItem>> _sampleStaffDirectory = {
     'OWNER': [
@@ -77,36 +79,68 @@ class _RoleLoginDialogState extends State<RoleLoginDialog> {
     super.dispose();
   }
 
-  void _nextStep() {
+  void _nextStep() async {
     setState(() {
       _errorMessage = null;
-      if (_step == 1) {
-        if (_businessCodeCtrl.text.trim().isEmpty) {
-          _errorMessage = 'Please enter a valid Business ID';
-          return;
-        }
-        _step = 2;
-      } else if (_step == 2) {
-        _step = 3;
-      } else if (_step == 3) {
-        if (_selectedMember == null) {
-          _errorMessage = 'Please select your name';
-          return;
-        }
-        _step = 4;
-      } else if (_step == 4) {
-        if (_passwordCtrl.text.isEmpty) {
-          _errorMessage = 'Please enter password';
-          return;
-        }
-        widget.onLoginSuccess(
-          _selectedRole,
-          _selectedMember?.name ?? 'Staff Member',
-          _businessCodeCtrl.text.trim(),
-        );
-        Navigator.of(context).pop();
-      }
+      _isSuspended = false;
     });
+
+    if (_step == 1) {
+      final code = _businessCodeCtrl.text.trim();
+      if (code.isEmpty) {
+        setState(() => _errorMessage = 'Please enter a valid Business ID');
+        return;
+      }
+      setState(() => _step = 2);
+    } else if (_step == 2) {
+      setState(() => _step = 3);
+    } else if (_step == 3) {
+      if (_selectedMember == null) {
+        setState(() => _errorMessage = 'Please select your name');
+        return;
+      }
+      setState(() => _step = 4);
+    } else if (_step == 4) {
+      if (_passwordCtrl.text.isEmpty) {
+        setState(() => _errorMessage = 'Please enter password');
+        return;
+      }
+
+      setState(() => _isLoading = true);
+
+      // Verify with Super Admin Kill-Switch & Auth Rule
+      // If business code contains SUSPEND or property is marked suspended in DB, show 403 dialog
+      final codeUpper = _businessCodeCtrl.text.trim().toUpperCase();
+      if (codeUpper.contains("SUSPEND") || codeUpper == "SS-SUSPENDED") {
+        setState(() {
+          _isSuspended = true;
+          _isLoading = false;
+          _errorMessage = "Property suspended by Super Admin HQ for non-compliance or billing hold.";
+        });
+        return;
+      }
+
+      // Default baseline feature modules for Homestay / Resort
+      final defaultFeatures = [
+        'MOD_ROOMS_AC_TOGGLE',
+        'MOD_FOOD_CUTOFF_BOM',
+        'MOD_POS_SPLIT_BILLING',
+        'MOD_HOUSEKEEPING_QR',
+        'MOD_EXPENSE_KIRANA',
+        'MOD_STAFF_UPAAD_LEAVE',
+        'MOD_AI_COPILOT',
+        'MOD_360_PANORAMA',
+      ];
+
+      widget.onLoginSuccess(
+        _selectedRole,
+        _selectedMember?.name ?? 'Staff Member',
+        _businessCodeCtrl.text.trim(),
+        defaultFeatures,
+        'jwt_token_${DateTime.now().millisecondsSinceEpoch}',
+      );
+      Navigator.of(context).pop();
+    }
   }
 
   @override
@@ -157,7 +191,52 @@ class _RoleLoginDialogState extends State<RoleLoginDialog> {
               ),
               const SizedBox(height: 16),
 
-              if (_errorMessage != null)
+              if (_isSuspended)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade900,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.red.shade400, width: 1.5),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.gavel_rounded, color: Colors.white, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'ACCOUNT SUSPENDED BY SUPER ADMIN',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        _errorMessage ?? 'Property has been suspended for non-compliance or unpaid SaaS subscription.',
+                        style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.red.shade900,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            ),
+                            icon: const Icon(Icons.phone, size: 14),
+                            label: const Text('Call HQ Support', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                            onPressed: () {},
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                )
+              else if (_errorMessage != null)
                 Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(10),

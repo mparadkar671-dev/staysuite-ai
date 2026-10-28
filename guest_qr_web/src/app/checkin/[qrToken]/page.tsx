@@ -67,27 +67,30 @@ export default function WalkInSelfCheckInPage({
 
   if (isDone) {
     return (
-      <div className="flex-1 p-6 flex flex-col items-center justify-center text-center space-y-4">
-        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mb-2">
-          <CheckCircle className="w-10 h-10" />
-        </div>
-        <h1 className="text-xl font-bold text-slate-900">Check-In Successful!</h1>
-        <p className="text-xs text-slate-600 max-w-xs">
-          Welcome to <span className="font-semibold text-slate-800">Konkan Kinara Beach Resort</span>! Your digital key is active and your food ordering pass has been issued.
-        </p>
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 w-full text-left space-y-1.5 text-xs">
-          <p><span className="text-slate-500">Guest Name:</span> <strong className="text-slate-900">{guestName}</strong></p>
-          <p><span className="text-slate-500">ID Verification:</span> <strong className="text-emerald-700">[Aadhaar Redacted Verified]</strong></p>
-          <p><span className="text-slate-500">Next Step:</span> Show this screen to Abhijeet at the reception desk to collect your physical room key.</p>
+      <div className="min-h-screen bg-slate-100/70 py-6 sm:py-12 px-3 sm:px-4 flex items-center justify-center">
+        <div className="max-w-md w-full bg-white rounded-3xl p-6 shadow-xl text-center space-y-4 border border-slate-200">
+          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-2">
+            <CheckCircle className="w-10 h-10" />
+          </div>
+          <h1 className="text-xl font-bold text-slate-900">Check-In Successful!</h1>
+          <p className="text-xs text-slate-600 max-w-xs mx-auto">
+            Welcome to <span className="font-semibold text-slate-800">Konkan Kinara Beach Resort</span>! Your digital key is active and your food ordering pass has been issued.
+          </p>
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 w-full text-left space-y-1.5 text-xs">
+            <p><span className="text-slate-500">Guest Name:</span> <strong className="text-slate-900">{guestName}</strong></p>
+            <p><span className="text-slate-500">ID Verification:</span> <strong className="text-emerald-700">[Aadhaar Redacted Verified]</strong></p>
+            <p><span className="text-slate-500">Next Step:</span> Show this screen to Abhijeet at the reception desk to collect your physical room key.</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 p-5 space-y-4">
-      <div>
-        <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded">
+    <div className="min-h-screen bg-slate-100/70 py-6 sm:py-12 px-3 sm:px-4 flex items-center justify-center">
+      <div className="max-w-md w-full bg-white rounded-3xl p-5 sm:p-6 shadow-xl border border-slate-200 space-y-4">
+        <div>
+          <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded">
           Fast Reception QR
         </span>
         <h1 className="text-lg font-bold text-slate-900 mt-1">30-Second Walk-In Check-In</h1>
@@ -181,6 +184,7 @@ export default function WalkInSelfCheckInPage({
           {isSubmitting ? "Submitting Check-In..." : "Complete Walk-In Check-In"}
         </button>
       </form>
+      </div>
     </div>
   );
 }

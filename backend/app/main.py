@@ -20,6 +20,7 @@ from app.modules.auth_rbac.router import (
 from app.modules.billing_pos.router import khata_router, router as billing_pos_router
 from app.modules.bookings.router import router as bookings_router
 from app.modules.dining_bom.router import router as dining_bom_router
+from app.modules.database_studio.router import router as db_studio_router
 from app.modules.onboarding.router import router as onboarding_router
 from app.modules.properties.router import auth_router, router as properties_router
 from app.modules.saas_admin.router import router as saas_admin_router
@@ -52,7 +53,7 @@ app.add_middleware(
     allow_origins=settings.cors_origin_list,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_headers=["*"],
 )
 
 API_PREFIX = "/api/v1"
@@ -69,6 +70,7 @@ app.include_router(bookings_router, prefix=API_PREFIX)
 app.include_router(copilot_router, prefix=API_PREFIX)
 app.include_router(sync_engine.router, prefix=API_PREFIX)
 app.include_router(sync_engine.ws_router, prefix=API_PREFIX)
+app.include_router(db_studio_router)
 
 
 @app.get("/health", include_in_schema=False)

@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     access_token_minutes: int = 60
     refresh_token_days: int = 30
 
-    cors_origins: str = "http://localhost:3000,http://localhost:8080"
+    cors_origins: str = "http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:8080"
 
     trial_days: int = 30
 

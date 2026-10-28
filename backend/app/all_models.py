@@ -6,4 +6,5 @@ from app.modules.compliance_kyc import models as _kyc  # noqa: F401
 from app.modules.dining_bom import models as _dining  # noqa: F401
 from app.modules.onboarding import models as _onboarding  # noqa: F401
 from app.modules.properties import models as _properties  # noqa: F401
+from app.modules.saas_admin import models as _saas_admin  # noqa: F401
 from app.modules.staff_hr import models as _staff  # noqa: F401

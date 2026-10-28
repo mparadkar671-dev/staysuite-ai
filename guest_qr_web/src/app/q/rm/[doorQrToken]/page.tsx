@@ -52,8 +52,9 @@ export default function HousekeepingDoorQrPage({
   };
 
   return (
-    <div className="flex-1 flex flex-col p-5 justify-between min-h-screen bg-slate-50">
-      <div className="space-y-4">
+    <div className="min-h-screen bg-slate-100/70 py-4 sm:py-8 px-3 sm:px-4 flex justify-center">
+      <div className="max-w-md w-full bg-white rounded-3xl p-5 shadow-xl border border-slate-200 flex flex-col justify-between min-h-[85vh]">
+        <div className="space-y-4">
         {/* Language Selector with Voice Prompt Button */}
         <div className="bg-white border border-slate-200 rounded-xl p-3 flex items-center justify-between shadow-sm">
           <div className="flex gap-1.5">
@@ -182,6 +183,7 @@ export default function HousekeepingDoorQrPage({
           <Wrench className="w-4 h-4 text-slate-600" />
           <span>🛠️ बिघाड नोंदवा (Report Maintenance / Geyser / AC Issue)</span>
         </button>
+      </div>
       </div>
     </div>
   );

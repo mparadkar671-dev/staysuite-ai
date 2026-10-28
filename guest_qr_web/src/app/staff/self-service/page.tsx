@@ -51,12 +51,33 @@ interface PendingStaff {
 }
 
 export default function EmployeeSelfServicePage() {
-  const [activeTab, setActiveTab] = useState<"tasks" | "upaad" | "leaves" | "approvals">("tasks");
+  const [activeTab, setActiveTab] = useState<"cleaning" | "tasks" | "upaad" | "leaves" | "approvals">("cleaning");
 
   // Current Staff Profile
-  const [staffRole, setStaffRole] = useState<string>("COOK");
-  const [staffName, setStaffName] = useState<string>("Vedika Patil");
-  const baseSalary = 16000;
+  const [staffRole, setStaffRole] = useState<string>("STAFF_HOUSEKEEPING");
+  const [staffName, setStaffName] = useState<string>("Ramesh Pawar");
+  const baseSalary = 13000;
+
+  // Housekeeping Rooms Queue
+  const [rooms, setRooms] = useState([
+    { id: "101", name: "Sea-Facing Deluxe Cottage", status: "DIRTY", guestDeparted: "10:30 AM" },
+    { id: "102", name: "Chira Stone Garden Cottage", status: "CLEAN", guestDeparted: "Yesterday" },
+    { id: "103", name: "Coconut Grove Villa", status: "DIRTY", guestDeparted: "11:00 AM" },
+  ]);
+
+  const speakVoice = (text: string, lang = "mr-IN") => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.lang = lang;
+      window.speechSynthesis.speak(utt);
+    }
+  };
+
+  const handleCleanRoom = (roomId: string) => {
+    setRooms(rooms.map((r) => (r.id === roomId ? { ...r, status: "CLEAN" } : r)));
+    speakVoice(`खोली क्रमांक ${roomId} साफ झाली आहे. डॅशबोर्ड हिरवा झाला.`);
+  };
 
   // Tasks state
   const [tasks, setTasks] = useState<TaskItem[]>([
@@ -143,32 +164,34 @@ export default function EmployeeSelfServicePage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col pb-20">
       {/* Top Navbar */}
-      <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-sm">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black text-sm">
-            SS
-          </div>
-          <span className="font-extrabold text-base tracking-tight text-slate-900">
-            Employee <span className="text-indigo-600">Self-Service</span>
-          </span>
-        </Link>
-        <div className="flex items-center gap-2">
-          <div className="text-right hidden sm:block">
-            <span className="text-xs font-black text-slate-900 block">{staffName}</span>
-            <span className="text-[10px] text-slate-500 font-mono">{staffRole} • Konkan Kinara</span>
-          </div>
-          <Link
-            href="/auth/login"
-            className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg flex items-center gap-1"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Switch Role</span>
+      <header className="bg-white border-b border-slate-200 px-4 sm:px-6 py-3 shadow-sm">
+        <div className="max-w-5xl mx-auto w-full flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black text-sm">
+              SS
+            </div>
+            <span className="font-extrabold text-base tracking-tight text-slate-900">
+              Employee <span className="text-indigo-600">Self-Service</span>
+            </span>
           </Link>
+          <div className="flex items-center gap-2">
+            <div className="text-right hidden sm:block">
+              <span className="text-xs font-black text-slate-900 block">{staffName}</span>
+              <span className="text-[10px] text-slate-500 font-mono">{staffRole} • Konkan Kinara</span>
+            </div>
+            <Link
+              href="/auth/login"
+              className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg flex items-center gap-1"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Switch Role</span>
+            </Link>
+          </div>
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="max-w-2xl mx-auto w-full px-4 pt-5 flex-1 space-y-4">
+      <main className="max-w-4xl lg:max-w-5xl mx-auto w-full px-4 sm:px-6 pt-5 pb-16 flex-1 space-y-5">
         {/* Profile / Role Banner */}
         <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-900 text-white p-4 rounded-2xl shadow-md flex items-center justify-between">
           <div>
@@ -199,6 +222,14 @@ export default function EmployeeSelfServicePage() {
 
         {/* Sub-Tabs */}
         <div className="flex bg-slate-200/70 p-1 rounded-xl text-xs font-bold gap-1 overflow-x-auto no-scrollbar">
+          <button
+            onClick={() => setActiveTab("cleaning")}
+            className={`flex-1 py-2 px-3 rounded-lg whitespace-nowrap transition ${
+              activeTab === "cleaning" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600"
+            }`}
+          >
+            🧹 Room Cleaned Queue ({rooms.filter((r) => r.status === "DIRTY").length})
+          </button>
           <button
             onClick={() => setActiveTab("tasks")}
             className={`flex-1 py-2 px-3 rounded-lg whitespace-nowrap transition ${
@@ -234,6 +265,73 @@ export default function EmployeeSelfServicePage() {
             </button>
           )}
         </div>
+
+        {/* TAB 0: Housekeeping Room Cleaning Queue */}
+        {activeTab === "cleaning" && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                  Assigned Dirty-to-Clean Room Queue
+                </h2>
+                <p className="text-[10px] text-slate-500">
+                  Tap green button or scan behind-the-door QR to mark cleaned with voice feedback.
+                </p>
+              </div>
+              <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">
+                Marathi &bull; Hindi &bull; English Voice Active
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              {rooms.map((room) => {
+                const isClean = room.status === "CLEAN";
+                return (
+                  <div
+                    key={room.id}
+                    className={`p-4 rounded-2xl border-2 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                      isClean
+                        ? "bg-emerald-50/60 border-emerald-300"
+                        : "bg-white border-amber-300 shadow-sm"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-base font-black text-slate-900">Room {room.id}</span>
+                        <span
+                          className={`text-[10px] font-black px-2.5 py-0.5 rounded-full ${
+                            isClean ? "bg-emerald-600 text-white" : "bg-amber-500 text-slate-950"
+                          }`}
+                        >
+                          {isClean ? "🟢 CLEAN (READY)" : "🔴 CLEANING REQUIRED"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 mt-0.5">{room.name}</p>
+                      <span className="text-[10px] text-slate-400">Checkout: {room.guestDeparted}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {!isClean ? (
+                        <button
+                          onClick={() => handleCleanRoom(room.id)}
+                          className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs px-5 py-3 rounded-xl shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition active:scale-95"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>[ 🟢 खोली साफ झाली (Room Cleaned) ]</span>
+                        </button>
+                      ) : (
+                        <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1.5 rounded-xl flex items-center gap-1">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                          Cleaned &bull; Live On Dashboard
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* TAB 1: My Tasks */}
         {activeTab === "tasks" && (

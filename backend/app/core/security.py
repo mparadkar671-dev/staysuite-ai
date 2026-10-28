@@ -14,7 +14,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.core.db import get_session
 from app.core.enums import Role
-from app.modules.properties.models import User
+from app.modules.properties.models import Property, User
+from app.plugins.category_matrix import FeatureModule, resolve_features
 
 settings = get_settings()
 _bearer = HTTPBearer(auto_error=False)
@@ -91,7 +92,7 @@ def decode_token(token: str, expected_type: str = "access") -> dict:
 
 
 async def resolve_principal(session: AsyncSession, token: str, expected_type: str = "access") -> Principal:
-    """Validates the JWT and re-checks the user row so deactivation / role changes apply at once."""
+    """Validates the JWT and re-checks the user and property status so deactivations and suspensions apply at once."""
     claims = decode_token(token, expected_type)
     try:
         user_id = uuid.UUID(claims["sub"])
@@ -104,6 +105,18 @@ async def resolve_principal(session: AsyncSession, token: str, expected_type: st
     ).one_or_none()
     if row is None or not row.is_active or row.is_deleted:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Account disabled")
+
+    # Super Admin Global Kill-Switch Check
+    if row.role != Role.SUPER_ADMIN:
+        prop_status = (
+            await session.execute(select(Property.status).where(Property.id == row.property_id))
+        ).scalar_one_or_none()
+        if prop_status == "SUSPENDED":
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                "This business account has been suspended by StaySuite Super Admin. Please contact billing support.",
+            )
+
     return Principal(user_id=user_id, property_id=row.property_id, role=row.role)
 
 
@@ -125,6 +138,38 @@ def require_roles(*roles: Role) -> Callable[..., Principal]:
     async def _dependency(principal: Principal = Depends(get_current_principal)) -> Principal:
         if principal.role not in allowed:
             raise HTTPException(status.HTTP_403_FORBIDDEN, "Insufficient role")
+        return principal
+
+    return _dependency
+
+
+def require_feature(feature_key: str | FeatureModule) -> Callable[..., Principal]:
+    """Dependency that ensures the authenticated tenant's category, subscription plan,
+    and Super Admin overrides currently permit access to this module."""
+    feat_str = feature_key.value if isinstance(feature_key, FeatureModule) else str(feature_key)
+
+    async def _dependency(
+        principal: Principal = Depends(get_current_principal),
+        session: AsyncSession = Depends(get_session),
+    ) -> Principal:
+        if principal.role == Role.SUPER_ADMIN:
+            return principal
+
+        prop = await session.get(Property, principal.property_id)
+        if not prop:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Property not found")
+
+        cat_str = prop.business_category.value if hasattr(prop.business_category, "value") else str(prop.business_category)
+        enabled_features = resolve_features(
+            cat_str,
+            getattr(prop, "subscription_plan", "TRIAL"),
+            getattr(prop, "feature_overrides", {}),
+        )
+        if feat_str not in enabled_features:
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                f"Feature module '{feat_str}' is not enabled for your active subscription plan. Contact Super Admin to upgrade.",
+            )
         return principal
 
     return _dependency

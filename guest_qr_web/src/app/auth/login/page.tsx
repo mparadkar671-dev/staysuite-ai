@@ -130,40 +130,42 @@ export default function MultiPersonLoginPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col pb-20">
       {/* Top Header */}
-      <header className="bg-white border-b border-slate-200 px-5 py-3.5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black text-sm">
-            SS
+      <header className="bg-white border-b border-slate-200 px-4 sm:px-6 py-3.5 shadow-xs">
+        <div className="max-w-5xl mx-auto w-full flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black text-sm">
+              SS
+            </div>
+            <span className="font-extrabold text-base tracking-tight text-slate-900">
+              StaySuite <span className="text-indigo-600">Identity</span>
+            </span>
+          </Link>
+          <div className="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
+            <button
+              onClick={() => {
+                setActiveMode("login");
+                setStep(1);
+              }}
+              className={`px-3 py-1.5 rounded-lg transition ${
+                activeMode === "login" ? "bg-white text-indigo-700 shadow-sm" : "text-slate-600"
+              }`}
+            >
+              4-Step Login
+            </button>
+            <button
+              onClick={() => setActiveMode("self-signup")}
+              className={`px-3 py-1.5 rounded-lg transition ${
+                activeMode === "self-signup" ? "bg-white text-indigo-700 shadow-sm" : "text-slate-600"
+              }`}
+            >
+              Worker Self-Signup
+            </button>
           </div>
-          <span className="font-extrabold text-base tracking-tight text-slate-900">
-            StaySuite <span className="text-indigo-600">Identity</span>
-          </span>
-        </Link>
-        <div className="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
-          <button
-            onClick={() => {
-              setActiveMode("login");
-              setStep(1);
-            }}
-            className={`px-3 py-1.5 rounded-lg transition ${
-              activeMode === "login" ? "bg-white text-indigo-700 shadow-sm" : "text-slate-600"
-            }`}
-          >
-            4-Step Login
-          </button>
-          <button
-            onClick={() => setActiveMode("self-signup")}
-            className={`px-3 py-1.5 rounded-lg transition ${
-              activeMode === "self-signup" ? "bg-white text-indigo-700 shadow-sm" : "text-slate-600"
-            }`}
-          >
-            Worker Self-Signup
-          </button>
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="max-w-md mx-auto w-full px-4 pt-6 flex-1 flex flex-col">
+      <main className="max-w-md sm:max-w-lg mx-auto w-full px-4 sm:px-6 pt-6 sm:pt-10 pb-16 flex-1 flex flex-col">
         {activeMode === "login" ? (
           /* 4-STEP IDENTITY LOGIN */
           <div className="space-y-4">
@@ -204,7 +206,7 @@ export default function MultiPersonLoginPage() {
 
                 <div className="pt-2 flex flex-col gap-2">
                   <Link
-                    href={selectedRole === "COOK" ? "/kitchen" : selectedRole === "OWNER" ? "/owner/dashboard" : "/staff/self-service"}
+                    href={selectedRole === "COOK" ? "/kitchen" : (selectedRole === "OWNER" || selectedRole === "MANAGER") ? "/owner/dashboard" : "/staff/self-service"}
                     className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-indigo-600/30"
                   >
                     <span>Open {selectedRole} Dashboard</span>

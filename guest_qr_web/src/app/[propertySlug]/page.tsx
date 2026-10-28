@@ -1,7 +1,94 @@
 "use client";
 
 import React, { useState } from "react";
-import { Sparkles, Wind, Eye, Compass, ShieldCheck, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { Sparkles, ShieldCheck, MapPin, Star, PhoneCall } from "lucide-react";
+import RoomConversionCard, { RoomCategoryData } from "@/components/RoomConversionCard";
+
+const SAMPLE_ROOM_CATEGORIES: RoomCategoryData[] = [
+  {
+    id: "cat-1",
+    category_name: "Sea-Facing Deluxe AC Cottage",
+    stay_template_type: "DELUXE_AC",
+    has_ac: true,
+    base_tariff_ac: 3200,
+    allow_guest_non_ac_toggle: true,
+    base_tariff_non_ac: 2400,
+    base_occupancy_adults: 2,
+    max_occupancy: 4,
+    extra_mattress_charge: 500,
+    driver_stay_free: true,
+    amenities_config: {
+      bathroom_location: "ATTACHED_INSIDE",
+      toilet_type: "WESTERN",
+      hot_water_type: "GEYSER_24X7",
+      wifi_free: true,
+      power_backup_inverter: true,
+      parking_car: true,
+      tv_smart: true,
+      private_balcony: true,
+      pet_friendly: false,
+      room_view: "SEA_VIEW",
+      free_value_perks: [
+        "Free Driver Dormitory Stay",
+        "Complimentary Welcome Solkadhi Drink",
+        "Direct Beach Access (30 seconds walk)",
+      ],
+    },
+    media_config: {
+      main_bed_photo_url: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
+      bathroom_photo_url: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=800&q=80",
+      balcony_photo_url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+      panorama_360_url: "https://pannellum.org/images/alma.jpg",
+    },
+    seasonal_offer: {
+      offer_title: "Monsoon Beachfront Special",
+      badge_tag: "🌧️ 20% OFF TODAY",
+      discount_percent: 20,
+    },
+    available_units: 1,
+  },
+  {
+    id: "cat-2",
+    category_name: "Coconut Grove Family Villa",
+    stay_template_type: "FAMILY_COTTAGE",
+    has_ac: true,
+    base_tariff_ac: 4500,
+    allow_guest_non_ac_toggle: true,
+    base_tariff_non_ac: 3600,
+    base_occupancy_adults: 4,
+    max_occupancy: 6,
+    extra_mattress_charge: 400,
+    driver_stay_free: true,
+    amenities_config: {
+      bathroom_location: "ATTACHED_INSIDE",
+      toilet_type: "BOTH",
+      hot_water_type: "SOLAR_MORNING",
+      wifi_free: true,
+      power_backup_inverter: true,
+      parking_car: true,
+      parking_bus: true,
+      private_balcony: true,
+      pet_friendly: true,
+      room_view: "GARDEN_VIEW",
+      free_value_perks: [
+        "Private Hammock in Betelnut Orchard",
+        "Free Car & Bus Parking",
+        "Authentic Chulivarcha Chai included",
+      ],
+    },
+    media_config: {
+      main_bed_photo_url: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80",
+      panorama_360_url: "https://pannellum.org/images/cerro-toco-0.jpg",
+    },
+    seasonal_offer: {
+      offer_title: "Direct Host Discount",
+      badge_tag: "⚡ 15% OFF DIRECT",
+      discount_percent: 15,
+    },
+    available_units: 2,
+  },
+];
 
 export default function DirectStorefrontPage({
   params,
@@ -9,166 +96,186 @@ export default function DirectStorefrontPage({
   params: Promise<{ propertySlug: string }>;
 }) {
   const [propertySlug, setPropertySlug] = useState<string>("konkan-kinara");
-  const [acRequired, setAcRequired] = useState(true);
-  const [showPanorama, setShowPanorama] = useState(false);
-  const [selectedRoom, setSelectedRoom] = useState<string>("sea-view-deluxe");
+  const [propertyData, setPropertyData] = useState<any>(null);
+  const [isSuspended, setIsSuspended] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   React.useEffect(() => {
-    params.then((p) => setPropertySlug(p.propertySlug));
+    params.then((p) => {
+      setPropertySlug(p.propertySlug);
+      fetch(`http://127.0.0.1:8000/api/v1/properties/by-slug/${p.propertySlug}`)
+        .then(async (r) => {
+          if (r.status === 403) {
+            setIsSuspended(true);
+            return null;
+          }
+          if (r.ok) return r.json();
+          return null;
+        })
+        .then((data) => {
+          if (data) setPropertyData(data);
+        })
+        .catch((err) => console.warn("Live property load fallback", err))
+        .finally(() => setLoading(false));
+    });
   }, [params]);
 
-  const baseAcPrice = 3800;
-  const baseNonAcPrice = 2800;
-  const currentPrice = acRequired ? baseAcPrice : baseNonAcPrice;
-  const advanceAmount = currentPrice * 0.5;
+  if (isSuspended) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-slate-900 border border-rose-500/30 rounded-3xl p-8 text-center space-y-4 shadow-2xl">
+          <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-400">
+            <ShieldCheck className="w-8 h-8 text-rose-500" />
+          </div>
+          <h2 className="text-xl font-bold text-white">Property Listing Suspended</h2>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            This property listing is currently paused by Super Admin HQ due to administrative review or policy compliance.
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/explore"
+              className="inline-flex px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-lg shadow-indigo-600/30"
+            >
+              Browse Other Verified Stays
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const propName = propertyData?.name || "Konkan Kinara Homestay & Cottages";
+  const propLocation = propertyData?.city
+    ? `${propertyData.city}, ${propertyData.state || "Maharashtra"}`
+    : "Tarkarli Beach Road, Malvan, Sindhudurg, Maharashtra";
+  const isFrozen = propertyData?.is_booking_frozen ?? false;
+  const merchantUpi = propertyData?.upi_vpa || "resort@okhdfcbank";
 
   return (
-    <div className="flex-1 flex flex-col pb-24">
+    <div className="flex-1 flex flex-col pb-24 bg-slate-50 min-h-screen">
       {/* Hero Header */}
-      <div className="relative h-56 bg-slate-900 overflow-hidden">
+      <div className="relative h-64 bg-slate-900 overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80"
+          src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80"
           alt="Resort Cover"
           className="w-full h-full object-cover opacity-80"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
-        <div className="absolute bottom-3 left-4 right-4 text-white">
-          <span className="inline-flex items-center gap-1 bg-emerald-500/90 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full mb-1">
-            <ShieldCheck className="w-3 h-3" /> 0% Commission Direct Booking
-          </span>
-          <h1 className="text-xl font-bold capitalize">Konkan Kinara Beach Resort</h1>
-          <p className="text-xs text-slate-300">Tarkarli Beach Road, Malvan, Maharashtra</p>
-        </div>
-      </div>
-
-      <div className="p-4 space-y-4">
-        {/* Dynamic Tariff Toggle: AC vs Non-AC */}
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-2">
-            <Wind className={`w-5 h-5 ${acRequired ? "text-indigo-600" : "text-slate-400"}`} />
-            <div>
-              <p className="text-xs font-semibold text-slate-900">
-                {acRequired ? "❄️ Air Conditioning Included" : "🌿 Natural Sea Breeze (Non-AC)"}
-              </p>
-              <p className="text-[11px] text-slate-500">
-                {acRequired ? "Save ₹1,000/night if AC not needed" : "Economical Konkan homestay tariff"}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => setAcRequired(!acRequired)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-              acRequired ? "bg-indigo-600 text-white" : "bg-emerald-600 text-white"
-            }`}
-          >
-            {acRequired ? "Switch to Non-AC" : "Switch to AC"}
-          </button>
-        </div>
-
-        {/* Plan-Gated 360° Panorama Viewer */}
-        <div className="border border-slate-200 rounded-xl overflow-hidden bg-slate-950 text-white">
-          <div className="p-3 bg-slate-900 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-semibold">
-              <Compass className="w-4 h-4 text-amber-400 animate-spin" />
-              <span>360° Interactive Virtual Room Tour</span>
-            </div>
-            <button
-              onClick={() => setShowPanorama(!showPanorama)}
-              className="text-[11px] bg-slate-800 hover:bg-slate-700 text-amber-300 px-2.5 py-1 rounded-md font-medium transition"
-            >
-              {showPanorama ? "Close 360°" : "Launch 360° View"}
-            </button>
-          </div>
-          {showPanorama ? (
-            <div className="relative h-60 bg-black flex items-center justify-center">
-              <iframe
-                title="Pannellum 360 Viewer"
-                src="https://pannellum.org/images/alma.jpg"
-                className="w-full h-full border-0 pointer-events-auto"
-              />
-              <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px]">
-                Drag to rotate 360°
-              </div>
-            </div>
-          ) : (
-            <div
-              onClick={() => setShowPanorama(true)}
-              className="h-32 bg-slate-800/80 hover:bg-slate-800 cursor-pointer flex flex-col items-center justify-center p-4 text-center transition"
-            >
-              <Eye className="w-7 h-7 text-amber-400 mb-1" />
-              <p className="text-xs font-semibold">Click to inspect Sea-Facing room in 360°</p>
-              <p className="text-[10px] text-slate-400">Verified authentic room panorama</p>
-            </div>
-          )}
-        </div>
-
-        {/* Instagram Reel Embed Showcase */}
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
-          <h2 className="text-xs font-bold text-slate-800 mb-2 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-pink-600" /> Guest Vibes & Local Seafood Thalis
-          </h2>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="relative rounded-lg overflow-hidden bg-slate-200 aspect-[9/14]">
-              <img
-                src="https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=400&q=80"
-                alt="Malvani Thali"
-                className="w-full h-full object-cover"
-              />
-              <span className="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
-                Surmai Fry Reel
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" />
+        <div className="absolute bottom-4 left-4 right-4 text-white">
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="inline-flex items-center gap-1 bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-sm">
+              <ShieldCheck className="w-3.5 h-3.5" /> 0% Middleman Commission
+            </span>
+            <span className="inline-flex items-center gap-1 bg-amber-400 text-slate-950 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+              <Star className="w-3 h-3 fill-slate-950" /> 4.9 (128 Verified Stays)
+            </span>
+            {isFrozen && (
+              <span className="inline-flex items-center gap-1 bg-cyan-400 text-slate-950 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full animate-pulse">
+                ❄️ Bookings Temporarily Frozen
               </span>
-            </div>
-            <div className="relative rounded-lg overflow-hidden bg-slate-200 aspect-[9/14]">
-              <img
-                src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80"
-                alt="Beach Sunset"
-                className="w-full h-full object-cover"
-              />
-              <span className="absolute bottom-2 left-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded">
-                Sunset Beach Walk
-              </span>
-            </div>
+            )}
           </div>
-        </div>
-
-        {/* Room Highlights & Booking Card */}
-        <div className="border border-slate-200 rounded-xl p-3.5 space-y-2">
-          <div className="flex justify-between items-baseline">
-            <h3 className="font-bold text-slate-900 text-sm">Deluxe Sea-Facing Cottage</h3>
-            <div className="text-right">
-              <span className="text-lg font-black text-indigo-600">₹{currentPrice}</span>
-              <span className="text-[10px] text-slate-500"> / night</span>
-            </div>
-          </div>
-          <ul className="text-xs text-slate-600 space-y-1">
-            <li className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Direct balcony view of the Arabian Sea
-            </li>
-            <li className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Complimentary home-style Malvani breakfast
-            </li>
-            <li className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> High-speed Wi-Fi & 24/7 solar hot water
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Fixed Sticky Footer for Instant 50% UPI Advance Booking */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-slate-200 p-3 shadow-2xl flex items-center justify-between z-50">
-        <div>
-          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">50% Advance Required</p>
-          <p className="text-base font-extrabold text-slate-900">
-            ₹{advanceAmount.toFixed(0)} <span className="text-[10px] font-normal text-slate-500">(0% MDR via UPI)</span>
+          <h1 className="text-2xl font-black tracking-tight">{propName}</h1>
+          <p className="text-xs text-slate-300 flex items-center gap-1 mt-1">
+            <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+            {propLocation}
           </p>
         </div>
-        <a
-          href={`upi://pay?pa=resort@okhdfcbank&pn=Konkan%20Kinara&am=${advanceAmount}&cu=INR`}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-5 py-3 rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center gap-2"
-        >
-          Pay 50% via UPI & Confirm
-        </a>
+      </div>
+
+      <div className="max-w-5xl lg:max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Booking Frozen Alert Banner */}
+        {isFrozen && (
+          <div className="bg-cyan-950 text-cyan-100 border border-cyan-800 rounded-2xl p-4 flex items-center justify-between shadow-md">
+            <div>
+              <p className="text-xs font-bold text-cyan-200 flex items-center gap-1.5">
+                ❄️ Bookings Temporarily Paused by Property Management
+              </p>
+              <p className="text-[11px] text-cyan-300 mt-0.5">
+                Online reservation intake is temporarily paused. Existing bookings and check-ins remain valid. You can call the host directly.
+              </p>
+            </div>
+            <a
+              href="tel:+919876543210"
+              className="flex items-center gap-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold px-3 py-2 rounded-xl transition shrink-0"
+            >
+              <PhoneCall className="w-3.5 h-3.5" /> Call Host
+            </a>
+          </div>
+        )}
+
+        {/* Direct Host Guarantee Banner */}
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 flex items-center justify-between shadow-sm">
+          <div>
+            <p className="text-xs font-bold text-emerald-950">
+              Direct Host Booking Advantage
+            </p>
+            <p className="text-[11px] text-emerald-700 mt-0.5">
+              Pay 50% UPI advance directly to host ({merchantUpi}). 0% convenience fees.
+            </p>
+          </div>
+          <a
+            href="tel:+919876543210"
+            className="flex items-center gap-1.5 bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded-xl hover:bg-emerald-700 transition shrink-0"
+          >
+            <PhoneCall className="w-3.5 h-3.5" /> Call Host
+          </a>
+        </div>
+
+        {/* Guest Vibes & Malvani Delicacies */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+          <h2 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+            <Sparkles className="w-4 h-4 text-pink-600" /> Authentic Konkan Experience
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="relative rounded-xl overflow-hidden bg-slate-100 aspect-[4/3] group">
+              <img
+                src="https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=500&q=80"
+                alt="Malvani Surmai Thali"
+                className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+              />
+              <span className="absolute bottom-2 left-2 bg-black/75 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-md">
+                Surmai Fry Thali
+              </span>
+            </div>
+            <div className="relative rounded-xl overflow-hidden bg-slate-100 aspect-[4/3] group">
+              <img
+                src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=500&q=80"
+                alt="Tarkarli White Sand Beach"
+                className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+              />
+              <span className="absolute bottom-2 left-2 bg-black/75 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-md">
+                1 Min Beach Walk
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Room Categories Section */}
+        <div>
+          <div className="mb-3">
+            <h2 className="text-sm font-black text-slate-900 uppercase tracking-wide">
+              Select Your Stay Option
+            </h2>
+            <p className="text-xs text-slate-500">
+              Toggle AC on/off to save money. Verified authentic photos and 360° virtual tours.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {SAMPLE_ROOM_CATEGORIES.map((category) => (
+              <RoomConversionCard
+                key={category.id}
+                category={category}
+                onBookNow={(catId, ac, advance) => {
+                  console.log("Booked room:", catId, "AC:", ac, "Advance:", advance);
+                }}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
